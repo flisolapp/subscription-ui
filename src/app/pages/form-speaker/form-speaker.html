@@ -10,16 +10,12 @@
         />
       }
 
-      <a
-        (click)="onBack()"
-        class="inline-flex items-center gap-1 text-sm no-underline mb-6 back-link"
-      >
-        <mat-icon class="!text-[18px] !w-[18px] !h-[18px] leading-none">arrow_back</mat-icon>
-        Voltar
-      </a>
-
-      <p class="text-default text-accent font-semibold tracking-widest uppercase text-sm mb-2">Participe</p>
-      <h1 class="text-default text-4xl font-black mb-4 text-foreground">Submissão de palestras</h1>
+      <h1 class="inline-flex items-center text-default text-4xl font-black mb-4 text-foreground">
+        <button matIconButton (click)="onBack()" class="mr-2">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        Submissão de palestras
+      </h1>
       <p class="text-default text-muted-foreground mb-2 text-justify">Faça sua inscrição no maior evento de software
         livre.</p>
       <p class="text-default text-muted-foreground mb-2 text-justify">As inscrições são gratuitas.</p>

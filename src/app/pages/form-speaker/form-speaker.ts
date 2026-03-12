@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
@@ -51,6 +51,7 @@ interface SerializedTalk {
     SpeakerFormNav,
     MatButton,
     MatIcon,
+    MatIconButton,
   ],
   templateUrl: './form-speaker.html',
   styleUrl: './form-speaker.scss',

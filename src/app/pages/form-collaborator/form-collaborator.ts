@@ -12,7 +12,7 @@ import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/in
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { debounceTime, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
@@ -91,6 +91,7 @@ export const COLLABORATION_AREAS: SelectOption[] = [
     MatCheckbox,
     MatButton,
     MatIcon,
+    MatIconButton,
   ],
   templateUrl: './form-collaborator.html',
   styleUrl: './form-collaborator.scss',

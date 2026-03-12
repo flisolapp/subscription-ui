@@ -2,16 +2,12 @@
   <div class="min-h-screen flex flex-col items-center px-4 py-12">
     <div class="w-full max-w-[960px]">
 
-      <a
-        (click)="onBack()"
-        class="inline-flex items-center gap-1 text-sm no-underline mb-6 back-link"
-      >
-        <mat-icon class="!text-[18px] !w-[18px] !h-[18px] leading-none">arrow_back</mat-icon>
-        Voltar
-      </a>
-
-      <p class="text-default text-accent font-semibold tracking-widest uppercase text-sm mb-2">Participe</p>
-      <h1 class="text-default text-4xl font-black mb-4 text-foreground">Quero colaborar</h1>
+      <h1 class="inline-flex items-center text-default text-4xl font-black mb-4 text-foreground">
+        <button matIconButton (click)="onBack()" class="mr-2">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        Quero colaborar
+      </h1>
       <p class="text-default text-muted-foreground mb-2 text-justify">Quer ajudar a construir o FLISoL deste ano?</p>
       <p class="text-default text-muted-foreground mb-2 text-justify">Estamos organizando a equipe de colaboradores para
         planejar o evento, trocar ideias e dividir as tarefas que fazem tudo acontecer.</p>

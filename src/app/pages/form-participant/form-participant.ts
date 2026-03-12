@@ -11,7 +11,7 @@ import {
 import { MatError, MatFormField, MatHint, MatInput, MatLabel } from '@angular/material/input';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { debounceTime, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
@@ -132,6 +132,7 @@ export const STATES_BR: SelectOption[] = [
     MatOption,
     MatButton,
     MatIcon,
+    MatIconButton,
   ],
   templateUrl: './form-participant.html',
   styleUrl: './form-participant.scss',
