@@ -16,9 +16,9 @@
     <div class="w-full max-w-[960px]">
 
       <!-- ── Header ──────────────────────────────────────────────────────────── -->
-      <p class="text-primary font-semibold tracking-widest uppercase text-sm mb-2">Confirmação</p>
-      <h1 class="text-4xl font-black mb-2">{{ title() }}</h1>
-      <p class="text-on-surface-variant mb-10 text-justify">
+      <p class="text-default text-primary font-semibold tracking-widest uppercase text-sm mb-2">Confirmação</p>
+      <h1 class="text-default text-4xl font-black mb-2">{{ title() }}</h1>
+      <p class="text-default text-on-surface-variant mb-10 text-justify">
         Revise seus dados antes de confirmar o envio.
       </p>
 
@@ -31,7 +31,7 @@
           @if (section.cardLayout) {
             <div class="rounded-xl border border-outline bg-surface p-6">
               @if (section.title) {
-                <h2 class="text-lg font-bold mb-4">{{ section.title }}</h2>
+                <h2 class="text-default text-lg font-bold mb-4">{{ section.title }}</h2>
               }
               <div class="flex flex-col sm:flex-row gap-6">
 
@@ -51,21 +51,26 @@
                     @if (row.type === 'pair') {
                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                         <div>
-                          <dt class="text-xs text-on-surface-variant uppercase tracking-wide">{{ row.first!.label }}
+                          <dt
+                            class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.first!.label }}
                           </dt>
-                          <dd class="text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '—' }}</dd>
+                          <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '—' }}</dd>
                         </div>
                         <div>
-                          <dt class="text-xs text-on-surface-variant uppercase tracking-wide">{{ row.second!.label }}
+                          <dt
+                            class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.second!.label }}
                           </dt>
-                          <dd class="text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '—' }}</dd>
+                          <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '—' }}</dd>
                         </div>
                       </div>
                     }
                     @if (row.type === 'single') {
                       <div>
-                        <dt class="text-xs text-on-surface-variant uppercase tracking-wide">{{ row.field!.label }}</dt>
-                        <dd class="text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '—' }}
+                        <dt
+                          class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.field!.label }}
+                        </dt>
+                        <dd
+                          class="text-default text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '—' }}
                         </dd>
                       </div>
                     }
@@ -78,12 +83,12 @@
           } @else if (section.tagLayout) {
             <div class="rounded-xl border border-outline bg-surface p-6">
               @if (section.title) {
-                <h2 class="text-lg font-bold mb-4">{{ section.title }}</h2>
+                <h2 class="text-default text-lg font-bold mb-4">{{ section.title }}</h2>
               }
               <div class="flex flex-wrap gap-2">
                 @for (field of section.fields; track $index) {
                   <span
-                    class="px-3 py-1.5 rounded-full border border-outline text-sm text-on-surface-variant leading-snug">
+                    class="text-default px-3 py-1.5 rounded-full border border-outline text-sm text-on-surface-variant leading-snug">
                     {{ field.label }}
                   </span>
                 }
@@ -94,24 +99,32 @@
           } @else {
             <div class="rounded-xl border border-outline bg-surface p-6">
               @if (section.title) {
-                <h2 class="text-lg font-bold mb-4">{{ section.title }}</h2>
+                <h2 class="text-default text-lg font-bold mb-4">{{ section.title }}</h2>
               }
               <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                 @for (row of fieldRows(section.fields); track $index) {
                   @if (row.type === 'pair') {
                     <div>
-                      <dt class="text-xs text-on-surface-variant uppercase tracking-wide">{{ row.first!.label }}</dt>
-                      <dd class="text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '—' }}</dd>
+                      <dt
+                        class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.first!.label }}
+                      </dt>
+                      <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '—' }}</dd>
                     </div>
                     <div>
-                      <dt class="text-xs text-on-surface-variant uppercase tracking-wide">{{ row.second!.label }}</dt>
-                      <dd class="text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '—' }}</dd>
+                      <dt
+                        class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.second!.label }}
+                      </dt>
+                      <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '—' }}</dd>
                     </div>
                   }
                   @if (row.type === 'single') {
                     <div [class.sm:col-span-2]="row.fullWidth">
-                      <dt class="text-xs text-on-surface-variant uppercase tracking-wide">{{ row.field!.label }}</dt>
-                      <dd class="text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '—' }}</dd>
+                      <dt
+                        class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.field!.label }}
+                      </dt>
+                      <dd
+                        class="text-default text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '—' }}
+                      </dd>
                     </div>
                   }
                 }
@@ -160,7 +173,7 @@
 
         <!-- Dev / debug actions — remove before production -->
         <div class="flex justify-end gap-2 border-t border-dashed border-outline pt-4">
-          <p class="text-xs text-on-surface-variant self-center mr-2 font-mono">DEV</p>
+          <p class="text-default text-xs text-on-surface-variant self-center mr-2 font-mono">DEV</p>
 
           <button
             mat-stroked-button

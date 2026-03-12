@@ -160,3 +160,15 @@ body.darkMode {
     animation: spinClockwise 2s linear infinite;
   }
 }
+
+// ── Border-outline utility ─────────────────────────────────────────────────
+// Tailwind's `border-outline` is not built-in, so we define it here.
+// Uses the Material sys outline token; explicit fallbacks cover both themes
+// when the token is not available (e.g. before the theme is fully resolved).
+.border-outline {
+  border-color: var(--mat-sys-outline, rgba(0, 0, 0, 0.12));
+}
+
+body.darkMode .border-outline {
+  border-color: var(--mat-sys-outline, rgba(255, 255, 255, 0.15));
+}
