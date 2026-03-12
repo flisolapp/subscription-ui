@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>{{ 'subscriptionChoice.confirmClear.title' | translate }}</h1>
+
+<div mat-dialog-content>
+  <p class="text-sm text-muted-foreground">
+    {{ 'subscriptionChoice.confirmClear.description' | translate }}
+  </p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" cdkFocusInitial>
+    {{ 'common.cancel' | translate }}
+  </button>
+
+  <button mat-flat-button color="warn" (click)="confirm()">
+    {{ 'subscriptionChoice.confirmClear.confirm' | translate }}
+  </button>
+</div>

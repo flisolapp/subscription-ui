@@ -1,0 +1,92 @@
+<div class="toolbar" role="banner">
+
+  <a href="/" class="h-10 object-contain mr-2">
+    @if (darkMode()) {
+      <img ngSrc="assets/images/logo-slim-white.svg" class="logo" alt="FLISoL" height="40" width="89"
+           [priority]="true" />
+    } @else {
+      <img ngSrc="assets/images/logo-slim.svg" class="logo" alt="FLISoL" height="40" width="89" [priority]="true" />
+    }
+  </a>
+
+  <span
+    class="text-xs tracking-wide mr-2 cursor-default"
+    [class.text-white]="darkMode()"
+    [class.text-muted-foreground]="!darkMode()"
+  >
+    <span class="sm:hidden">2026</span>
+    <span class="hidden sm:inline">{{ 'header.edition' | translate }} 2026</span>
+  </span>
+
+  <div
+    class="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border-0 cursor-default"
+    [class.text-white]="darkMode()"
+    [class.text-muted-foreground]="!darkMode()">
+    <mat-icon
+      class="!text-[14px] !w-[14px] !h-[14px]"
+      fontSet="outlined">location_on
+    </mat-icon>
+    Brasília/DF
+  </div>
+
+  <!--
+  <button mat-button onclick="javascript:void(0)"
+          matTooltip="Brasília é uma Cidade Maravilhosa/DF"
+          [matTooltipPosition]="'below'">
+    <! - - {edition.label} - - >
+    <span class="edition-location">
+      <mat-icon
+        fontIcon="location_on"
+        class="!text-[14px] !w-[14px] !h-[14px]"
+      ></mat-icon>
+      <span class="edition-location__label">Brasília é uma Cidade Maravilhosa/DF</span>
+    </span>
+  </button>
+  -->
+
+  <div class="spacer"></div>
+
+  <button mat-icon-button (click)="toggleColorScheme()"
+          matTooltip="{{ (darkMode() ? 'header.turnOnLightMode' : 'header.turnOnDarkMode') | translate }}"
+          [matTooltipPosition]="'below'">
+    <mat-icon fontSet="outlined">
+      @if (darkMode()) {
+        dark_mode
+      } @else {
+        light_mode
+      }
+    </mat-icon>
+  </button>
+
+  <button mat-icon-button class="language-menu"
+          [matTooltip]="language()?.name"
+          [matTooltipPosition]="'below'"
+          [matMenuTriggerFor]="menu"
+          xPosition="before">
+    @if (darkMode()) {
+      <img [ngSrc]="'assets/images/flags/' + (language()?.flag?.toLowerCase() || 'default') + '-white.svg'" alt=""
+           height="18" width="24" />
+    } @else {
+      <img [ngSrc]="'assets/images/flags/' + (language()?.flag?.toLowerCase() || 'default') + '.svg'" alt="" height="18"
+           width="24" />
+    }
+  </button>
+
+  <mat-menu #menu="matMenu">
+    @for (item of languageService.getLanguages(); track $index) {
+      <button mat-menu-item class="language-menu-item"
+              [disabled]="item.code === language()?.code"
+              (click)="selectLanguage(item)">
+        @if (darkMode()) {
+          <img [ngSrc]="'assets/images/flags/' + (item.flag?.toLowerCase() || 'default') + '-white.svg'" alt=""
+               height="18" width="24" />
+        } @else {
+          <img [ngSrc]="'assets/images/flags/' + (item.flag?.toLowerCase() || 'default') + '.svg'" alt="" height="18"
+               width="24" />
+        }
+        <span>{{ item.name }}</span>
+      </button>
+    }
+  </mat-menu>
+
+</div>

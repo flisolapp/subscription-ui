@@ -1,0 +1,191 @@
+<app-page-structure>
+  <div class="min-h-screen flex flex-col items-center px-4 py-12">
+    <div class="w-full max-w-[960px]">
+
+      <a
+        (click)="onBack()"
+        class="inline-flex items-center gap-1 text-sm no-underline mb-6 back-link"
+      >
+        <mat-icon class="!text-[18px] !w-[18px] !h-[18px] leading-none">arrow_back</mat-icon>
+        Voltar
+      </a>
+
+      <p class="text-default text-accent font-semibold tracking-widest uppercase text-sm mb-2">Participe</p>
+      <h1 class="text-default text-4xl font-black mb-4 text-foreground">Inscreva-se</h1>
+      <p class="text-default text-muted-foreground mb-2 text-justify">Garanta sua participação no maior evento de
+        software livre.</p>
+      <p class="text-default text-muted-foreground mb-10 text-justify">As inscrições são gratuitas - basta se inscrever
+        e fazer parte da comunidade que constrói, compartilha e acredita no software livre.</p>
+
+      <form class="participant-form" [formGroup]="form" (ngSubmit)="onSubmit($event)" novalidate>
+
+        <!-- Nome -->
+        <mat-form-field class="participant-field">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="name" autocomplete="name" />
+          @if (hasError('name')) {
+            <mat-error>{{ getError('name') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- CPF -->
+        <mat-form-field class="participant-field">
+          <mat-label>CPF</mat-label>
+          <input
+            matInput
+            formControlName="federalCode"
+            placeholder="000.000.000-00"
+            inputmode="numeric"
+            autocomplete="off"
+            (input)="applyFederalCodeMask($event)"
+          />
+          <mat-hint>Cadastro de Pessoa Física</mat-hint>
+          @if (hasError('federalCode')) {
+            <mat-error>{{ getError('federalCode') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- E-mail -->
+        <mat-form-field class="participant-field">
+          <mat-label>E-mail</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          @if (hasError('email')) {
+            <mat-error>{{ getError('email') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Telefone -->
+        <mat-form-field class="participant-field">
+          <mat-label>Telefone</mat-label>
+          <input
+            matInput
+            formControlName="phone"
+            placeholder="(00) 00000-0000"
+            inputmode="tel"
+            autocomplete="tel"
+            (input)="applyPhoneMask($event)"
+          />
+          @if (hasError('phone')) {
+            <mat-error>{{ getError('phone') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Usa Software Livre? -->
+        <div class="radio-field">
+          <label class="radio-label text-default">
+            Usa Software Livre?
+            <span class="radio-required" aria-hidden="true">*</span>
+          </label>
+          <mat-radio-group
+            formControlName="usesFreeSoftware"
+            class="radio-group"
+            aria-label="Usa Software Livre?"
+          >
+            <mat-radio-button value="yes">Sim</mat-radio-button>
+            <mat-radio-button value="no">Não</mat-radio-button>
+          </mat-radio-group>
+          @if (hasError('usesFreeSoftware')) {
+            <mat-error class="radio-error">{{ getError('usesFreeSoftware') }}</mat-error>
+          }
+        </div>
+
+        <!-- Qual distribuição GNU/Linux você usa? -->
+        <mat-form-field class="participant-field">
+          <mat-label>Qual distribuição GNU/Linux você usa?</mat-label>
+          <input
+            matInput
+            formControlName="distro"
+            placeholder="Buscar distribuição..."
+            [matAutocomplete]="distroAuto"
+            autocomplete="off"
+          />
+          <mat-autocomplete #distroAuto="matAutocomplete" [displayWith]="displayLabel(distros)">
+            @for (option of filteredDistros$ | async; track option.value) {
+              <mat-option [value]="option.value" (onSelectionChange)="selectOption('distro', option)">
+                {{ option.label }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+          @if (hasError('distro')) {
+            <mat-error>{{ getError('distro') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Você é estudante? -->
+        <mat-form-field class="participant-field">
+          <mat-label>Você é estudante?</mat-label>
+          <input
+            matInput
+            formControlName="isStudent"
+            placeholder="Selecione sua situação..."
+            [matAutocomplete]="studentAuto"
+            autocomplete="off"
+          />
+          <mat-autocomplete #studentAuto="matAutocomplete" [displayWith]="displayLabel(studentOptions)">
+            @for (option of studentOptions; track option.value) {
+              <mat-option [value]="option.value" (onSelectionChange)="selectOption('isStudent', option)">
+                {{ option.label }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+          @if (hasError('isStudent')) {
+            <mat-error>{{ getError('isStudent') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Onde você estuda ou trabalha? -->
+        <mat-form-field class="participant-field">
+          <mat-label>Onde você estuda ou trabalha?</mat-label>
+          <input matInput formControlName="institution" autocomplete="organization" />
+          @if (hasError('institution')) {
+            <mat-error>{{ getError('institution') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Qual curso faz ou é formado? -->
+        <mat-form-field class="participant-field">
+          <mat-label>Qual curso faz ou é formado?</mat-label>
+          <input matInput formControlName="course" />
+          @if (hasError('course')) {
+            <mat-error>{{ getError('course') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Em qual estado você reside? -->
+        <mat-form-field class="participant-field">
+          <mat-label>Em qual estado você reside?</mat-label>
+          <input
+            matInput
+            formControlName="state"
+            placeholder="Buscar estado..."
+            [matAutocomplete]="stateAuto"
+            autocomplete="off"
+          />
+          <mat-autocomplete #stateAuto="matAutocomplete" [displayWith]="displayLabel(statesBr)">
+            @for (option of filteredStates$ | async; track option.value) {
+              <mat-option [value]="option.value" (onSelectionChange)="selectOption('state', option)">
+                <span class="state-uf">{{ option.value }}</span>
+                {{ option.label }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+          @if (hasError('state')) {
+            <mat-error>{{ getError('state') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Voltar
+          </button>
+          <button mat-flat-button color="primary" type="submit">
+            Revisar dados
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</app-page-structure>

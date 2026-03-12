@@ -1,0 +1,79 @@
+{
+  "common": {
+    "ok": "OK",
+    "accept": "Sí",
+    "reject": "No",
+    "copied": "Copiado",
+    "close": "Cerrar",
+    "cancel": "Cancelar"
+  },
+  "header": {
+    "edition": "Edición",
+    "turnOnLightMode": "Activar el modo claro",
+    "turnOnDarkMode": "Activar el modo oscuro"
+  },
+  "subscriptionChoice": {
+    "joinUs": "Únete a nosotros",
+    "title": "Suscribirse",
+    "description": "Haz tu suscripción al mayor evento de software libre. Las suscripciones son gratuitas.",
+    "cards": {
+      "participant": {
+        "type": "Participante",
+        "title": "Suscribirse",
+        "description": "Únete a nosotros como asistente al mayor evento de software libre. ¡Es gratis!"
+      },
+      "speaker": {
+        "type": "Orador",
+        "title": "Conferencia/Taller",
+        "description": "Un evento puede tener múltiples oradores. Un orador puede presentar múltiples eventos."
+      },
+      "collaborator": {
+        "type": "Colaborador",
+        "title": "Quiero colaborar",
+        "description": "Ayuda a organizar el evento."
+      }
+    },
+    "resume": {
+      "title": "Suscripción en curso",
+      "description": "Tienes una suscripción como <strong>{{ type }}</strong> en curso. ¿Deseas continuar?",
+      "continue": "Continuar",
+      "startNew": "Nueva suscripción"
+    },
+    "confirmClear": {
+      "title": "¿Descartar datos?",
+      "description": "Todos los datos previamente completados serán eliminados. Esta acción no se puede deshacer.",
+      "confirm": "Eliminar y comenzar nueva"
+    }
+  },
+  "search": {
+    "title": "Validador de Certificado",
+    "description": "Valide de forma centralizada, fácil y rápido o certificado emitido pelo FLISoL.",
+    "termSearchPlace": "Introduce tu email o código",
+    "notFound": "No se han encontrado resultados.",
+    "oneFound": "certificado encontrado.",
+    "manyFound": "certificados encontrados.",
+    "repeatSearch": "Haz otra búsqueda.",
+    "edition": "Edición",
+    "unit": "Unidad",
+    "name": "Nombre",
+    "enjoyedAs": "Fue como",
+    "code": "Código",
+    "download": "Descargar",
+    "preview": "Previa",
+    "role": {
+      "organizer": "Organizador",
+      "collaborator": "Colaborador",
+      "speaker": "Orador",
+      "participant": "Participante"
+    },
+    "confirmation": {
+      "title": "Confirmación",
+      "description": "¿Estás seguro de que quieres continuar?"
+    },
+    "error": {
+      "-1": "El término no es válido para buscar. Es requerido.",
+      "-2": "El término no es válido para buscar.",
+      "-3": "El término no es válido para buscar. Debe ser un correo electrónico o un código de certificado."
+    }
+  }
+}

@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>{{ 'subscriptionChoice.resume.title' | translate }}</h1>
+
+<div mat-dialog-content>
+  <p class="text-sm text-muted-foreground"
+     [innerHTML]="'subscriptionChoice.resume.description' | translate: { type: ('subscriptionChoice.cards.' + data.subscriptionType + '.type' | translate) }">
+  </p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="startNew()">
+    {{ 'subscriptionChoice.resume.startNew' | translate }}
+  </button>
+
+  <button mat-flat-button (click)="continue()" cdkFocusInitial>
+    {{ 'subscriptionChoice.resume.continue' | translate }}
+  </button>
+</div>

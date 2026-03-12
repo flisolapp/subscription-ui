@@ -1,0 +1,153 @@
+<div [id]="'talk-' + idx()" class="talk-card scroll-mt-24" [formGroup]="group()">
+
+  @if (total() > 1) {
+    <div class="card-header">
+      <span class="card-title text-default">Atividade {{ idx() + 1 }}</span>
+      <button
+        mat-icon-button
+        type="button"
+        class="card-remove-btn"
+        (click)="remove.emit()"
+        aria-label="Remover atividade"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Título -->
+  <mat-form-field class="talk-field">
+    <mat-label>Título da Palestra/Oficina</mat-label>
+    <input matInput formControlName="titulo" />
+    @if (hasError('titulo')) {
+      <mat-error>{{ getError('titulo') }}</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Descrição -->
+  <mat-form-field class="talk-field">
+    <mat-label>Descrição</mat-label>
+    <textarea matInput formControlName="descricao" rows="4"></textarea>
+    @if (hasError('descricao')) {
+      <mat-error>{{ getError('descricao') }}</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Preferência de turno -->
+  <div class="radio-field">
+    <label class="radio-label text-default">
+      Preferência de turno
+      <span class="radio-required" aria-hidden="true">*</span>
+    </label>
+    <mat-radio-group
+      formControlName="turno"
+      class="radio-group"
+      aria-label="Preferência de turno"
+    >
+      @for (option of turnos; track option.value) {
+        <mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
+      }
+    </mat-radio-group>
+    @if (hasError('turno')) {
+      <mat-error class="radio-error">{{ getError('turno') }}</mat-error>
+    }
+  </div>
+
+  <!-- Tipo de atividade -->
+  <div class="radio-field">
+    <label class="radio-label text-default">
+      Tipo de atividade
+      <span class="radio-required" aria-hidden="true">*</span>
+    </label>
+    <mat-radio-group
+      formControlName="tipo"
+      class="radio-group"
+      aria-label="Tipo de atividade"
+    >
+      @for (option of tipos; track option.value) {
+        <mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
+      }
+    </mat-radio-group>
+    @if (hasError('tipo')) {
+      <mat-error class="radio-error">{{ getError('tipo') }}</mat-error>
+    }
+  </div>
+
+  <!-- Assunto (Tema) — autocomplete -->
+  <mat-form-field class="talk-field">
+    <mat-label>Assunto (Tema)</mat-label>
+    <input
+      matInput
+      formControlName="tema"
+      placeholder="Buscar tema..."
+      [matAutocomplete]="temaAuto"
+      autocomplete="off"
+    />
+    <mat-autocomplete #temaAuto="matAutocomplete" [displayWith]="displayTema">
+      @for (option of filteredTemas$ | async; track option.value) {
+        <mat-option [value]="option.value" (onSelectionChange)="selectTema(option)">
+          {{ option.label }}
+        </mat-option>
+      }
+    </mat-autocomplete>
+    @if (hasError('tema')) {
+      <mat-error>{{ getError('tema') }}</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Slide (file upload) -->
+  <div class="slide-upload-field">
+    <label class="slide-upload-label text-default">
+      Slide <span class="slide-formats">(PDF, ODP ou PPT/X)</span>
+    </label>
+    <div
+      class="slide-upload-area"
+      (click)="slideFileInput.click()"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="slideFileInput.click()"
+      aria-label="Enviar arquivo de slide"
+    >
+      <mat-icon class="slide-upload-icon">upload</mat-icon>
+      <span class="slide-upload-name" [class.slide-upload-name--filled]="!!slideFile()">
+        {{ slideFile() ? slideFile()!.name : 'Escolher arquivo' }}
+      </span>
+      <input
+        #slideFileInput
+        type="file"
+        accept=".pdf,.odp,.ppt,.pptx"
+        class="hidden-input"
+        (change)="onSlideSelect($event)"
+      />
+      @if (slideFile()) {
+        <div class="slide-file-actions" (click)="$event.stopPropagation()">
+          <button
+            mat-icon-button
+            type="button"
+            class="slide-action-btn slide-action-btn--primary"
+            (click)="downloadSlide()"
+            title="Baixar slide"
+          >
+            <mat-icon>download</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            class="slide-action-btn slide-action-btn--warn"
+            (click)="onSlideRemove($event)"
+            title="Remover slide"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Endereço do Slide (URL) -->
+  <mat-form-field class="talk-field">
+    <mat-label>Endereço do Slide</mat-label>
+    <input matInput formControlName="slideUrl" placeholder="URL do slide (opcional)" />
+  </mat-form-field>
+
+</div>

@@ -1,0 +1,162 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@use 'scss/palettes' as palette;
+
+html {
+  //@include mat.theme((
+  //  color: (
+  //    primary: palette.$black-palette,
+  //    tertiary: palette.$black-palette,
+  //    theme-type: light,
+  //  ),
+  //  typography: Roboto,
+  //  density: 0
+  //));
+  color-scheme: light;
+  @include mat.theme((
+    color: palette.$black-palette,
+    typography: Roboto,
+    density: 0
+  ));
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  overflow-x: hidden; // prevent horizontal scrollbar
+  overflow-y: auto; // vertical scrollbar only when needed
+}
+
+/*
+// Custom
+:host {
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*/
+
+/* Global styles only */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// Custom
+body {
+  font-size: 14px;
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 8px 0;
+}
+
+// p {
+//   margin: 0;
+// }
+
+.language-menu-item .mat-mdc-menu-item-text {
+  img {
+    margin-top: 1px;
+    position: absolute;
+    border-radius: 2px;
+  }
+
+  span {
+    margin-left: 32px;
+  }
+}
+
+app-search-result .mat-mdc-card-header-text {
+  display: block;
+  width: 100%;
+}
+
+// Table
+.striped-table .mat-mdc-header-row {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.striped-table .mat-mdc-row:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.04); // Light gray for light theme
+}
+
+.striped-table .mat-mdc-row:hover {
+  background-color: rgba(33, 150, 243, 0.1); // Optional hover effect (light blue tint)
+}
+
+// Dark mode
+body.darkMode {
+  color-scheme: dark;
+  background-color: #333;
+
+  .text-default {
+    color: #fff !important;
+  }
+
+  // Grouping elements with the same color property
+  .toolbar mat-icon.material-icons, .material-symbols-outlined, h1.title, p.description, p.result-message, footer {
+    color: #fff;
+  }
+
+  .history-item {
+    color: #e3e3e3;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  // Nesting for anchor tag inside p.result-message
+  p.result-message {
+    a {
+      color: #7CACF8 !important;
+    }
+  }
+
+  // Applying the color to all child elements of .card
+  .card * {
+    color: white !important;
+  }
+
+  // Table
+  .striped-table .mat-mdc-header-row {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .striped-table .mat-mdc-row:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.06); // Light white for dark theme
+  }
+
+  .striped-table .mat-mdc-row:hover {
+    background-color: rgba(33, 150, 243, 0.2); // Stronger hover in dark mode
+  }
+}
+
+.material-symbols-outlined {
+  // Clockwise spinning effect (Z-axis)
+  @keyframes spinClockwise {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  &.icon-spinClockwise {
+    display: inline-block;
+    animation: spinClockwise 2s linear infinite;
+  }
+}

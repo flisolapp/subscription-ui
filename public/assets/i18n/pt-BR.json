@@ -1,0 +1,81 @@
+{
+  "common": {
+    "ok": "OK",
+    "accept": "Sim",
+    "reject": "Não",
+    "turnOnLightMode": "Ativar o modo claro",
+    "turnOnDarkMode": "Ativar o modo escuro",
+    "copied": "Copiado",
+    "close": "Fechar",
+    "cancel": "Cancelar"
+  },
+  "header": {
+    "edition": "Edição",
+    "turnOnLightMode": "Ativar o modo claro",
+    "turnOnDarkMode": "Ativar o modo escuro"
+  },
+  "subscriptionChoice": {
+    "joinUs": "Participe",
+    "title": "Inscreva-se",
+    "description": "Faça sua inscrição no maior evento de software livre. As inscrições são gratuitas.",
+    "cards": {
+      "participant": {
+        "type": "Participante",
+        "title": "Inscreva-se",
+        "description": "Participe como ouvinte do maior evento de software livre. Gratuito!"
+      },
+      "speaker": {
+        "type": "Palestrante",
+        "title": "Palestra/Oficina",
+        "description": "Uma atividade pode ter vários palestrantes. Um palestrante pode submeter várias atividades."
+      },
+      "collaborator": {
+        "type": "Colaborador",
+        "title": "Quero colaborar",
+        "description": "Ajude na organização do evento."
+      }
+    },
+    "resume": {
+      "title": "Inscrição em andamento",
+      "description": "Você tinha uma inscrição como <strong>{{ type }}</strong> em andamento. Deseja continuar?",
+      "continue": "Continuar",
+      "startNew": "Nova inscrição"
+    },
+    "confirmClear": {
+      "title": "Descartar dados?",
+      "description": "Todos os dados preenchidos anteriormente serão apagados. Essa ação não pode ser desfeita.",
+      "confirm": "Apagar e começar nova"
+    }
+  },
+  "search": {
+    "title": "Validador de Certificado",
+    "description": "Valide de forma centralizada, fácil e rápida o certificado emitido pelo FLISoL.",
+    "termSearchPlace": "Forneça seu email ou código",
+    "notFound": "Nenhum resultado encontrado.",
+    "oneFound": "certificado encontrado.",
+    "manyFound": "certificados encontrados.",
+    "repeatSearch": "Fazer outra pesquisa.",
+    "edition": "Edição",
+    "unit": "Unidade",
+    "name": "Nome",
+    "enjoyedAs": "Foi como",
+    "code": "Código",
+    "download": "Baixar",
+    "preview": "Pré-visualização",
+    "role": {
+      "organizer": "Organizador",
+      "collaborator": "Colaborador",
+      "speaker": "Palestrante",
+      "participant": "Participante"
+    },
+    "confirmation": {
+      "title": "Confirmação",
+      "description": "Tem certeza de que deseja prosseguir?"
+    },
+    "error": {
+      "-1": "O termo é inválido para pesquisa. É necessário.",
+      "-2": "O termo é inválido para pesquisa.",
+      "-3": "O termo é inválido para pesquisa. Deve ser um e-mail ou código de certificado."
+    }
+  }
+}

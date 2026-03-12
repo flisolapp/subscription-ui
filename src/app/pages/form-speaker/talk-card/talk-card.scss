@@ -1,0 +1,141 @@
+// ── Card wrapper ──────────────────────────────────────────────────────────────
+.talk-card {
+  background: color-mix(in srgb, var(--mat-sys-surface-variant) 50%, transparent);
+  border: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+// ── Card header (visible when total > 1) ─────────────────────────────────────
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+
+  .card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .card-remove-btn {
+    color: var(--mat-sys-error, red);
+  }
+}
+
+// ── Form fields ───────────────────────────────────────────────────────────────
+.talk-field {
+  width: 100%;
+}
+
+// ── Radio group (reuses collaborator pattern) ─────────────────────────────────
+.radio-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+
+  .radio-label {
+    font-size: 0.875rem;
+    cursor: default;
+
+    .radio-required {
+      color: var(--mat-form-field-error-text-color, red);
+      margin-left: 2px;
+    }
+  }
+
+  .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .radio-error {
+    font-size: 0.75rem;
+  }
+}
+
+// ── Slide upload area (mimics Material filled appearance) ─────────────────────
+.slide-upload-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+
+  .slide-upload-label {
+    font-size: 0.875rem;
+    cursor: default;
+
+    .slide-formats {
+      font-weight: 400;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+}
+
+.slide-upload-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 56px;
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid var(--mat-sys-outline, rgba(0, 0, 0, 0.42));
+  background: var(--mat-filled-text-field-container-color,
+    color-mix(in srgb, var(--mat-sys-on-surface) 4%, var(--mat-sys-surface)));
+  padding: 0 1rem;
+  cursor: pointer;
+  transition: border-bottom-color 200ms;
+
+  &:hover {
+    border-bottom-color: var(--mat-sys-on-surface);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-bottom: 2px solid var(--mat-sys-primary);
+  }
+}
+
+.slide-upload-icon {
+  color: var(--mat-sys-on-surface-variant);
+  flex-shrink: 0;
+}
+
+.slide-upload-name {
+  flex: 1;
+  font-size: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--filled {
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.slide-file-actions {
+  display: flex;
+  gap: 0.125rem;
+  flex-shrink: 0;
+  margin-left: auto;
+
+  .slide-action-btn {
+    &--primary {
+      color: var(--mat-sys-primary);
+    }
+
+    &--warn {
+      color: var(--mat-sys-error, red);
+    }
+  }
+}
+
+.hidden-input {
+  display: none;
+}

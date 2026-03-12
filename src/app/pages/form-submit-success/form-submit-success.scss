@@ -1,0 +1,16 @@
+.success-icon-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+}
+
+.success-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: var(--mat-sys-primary);
+}

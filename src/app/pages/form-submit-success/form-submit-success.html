@@ -1,0 +1,36 @@
+<app-page-structure>
+  <div class="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16">
+    <div class="w-full max-w-[960px] flex flex-col items-center text-center">
+
+      <!-- ── Icon ──────────────────────────────────────────────────────────── -->
+      <div class="success-icon-ring mb-8">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+      </div>
+
+      <!-- ── Copy ───────────────────────────────────────────────────────────── -->
+      <p class="text-primary font-semibold tracking-widest uppercase text-sm mb-3">
+        Tudo certo!
+      </p>
+
+      <h1 class="text-4xl font-black mb-4">
+        {{ title() }}
+      </h1>
+
+      <p class="text-on-surface-variant text-base mb-10 max-w-md">
+        A sua inscrição foi realizada com sucesso. Até breve!
+      </p>
+
+      <!-- ── Action ─────────────────────────────────────────────────────────── -->
+      <button
+        mat-button
+        color="primary"
+        type="button"
+        (click)="onNewSubscription()"
+      >
+        <mat-icon>add</mat-icon>
+        Realizar nova inscrição
+      </button>
+
+    </div>
+  </div>
+</app-page-structure>

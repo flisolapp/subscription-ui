@@ -1,0 +1,40 @@
+<app-page-structure>
+  <div class="flex flex-col items-center px-4 py-12 mx-auto max-w-[960px]">
+    <p class="text-default font-semibold tracking-widest uppercase text-sm mb-2">
+      {{ 'subscriptionChoice.joinUs' | translate }}
+    </p>
+
+    <h1 class="text-default text-4xl md:text-5xl mb-3 text-center">
+      {{ 'subscriptionChoice.title' | translate }}
+    </h1>
+
+    <p class="text-default text-muted-foreground text-lg mb-12 text-center max-w-md">
+      {{ 'subscriptionChoice.description' | translate }}
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+      @for (card of cards; track card.type) {
+        <button
+          type="button"
+          (click)="onSelect(card.path)"
+          class="card group flex flex-col items-center text-center rounded-2xl border border-border bg-card p-8 cursor-pointer transition-colors hover:bg-secondary hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <mat-icon
+            fontSet="outlined"
+            class="!text-[60px] !w-[60px] !h-[60px] text-primary mb-1 transition-transform group-hover:scale-110"
+          >
+            {{ card.icon }}
+          </mat-icon>
+
+          <h2 class="text-xl font-bold text-foreground mb-4">
+            {{ card.titleKey | translate }}
+          </h2>
+
+          <p class="text-muted-foreground text-sm leading-relaxed">
+            {{ card.descriptionKey | translate }}
+          </p>
+        </button>
+      }
+    </div>
+  </div>
+</app-page-structure>

@@ -1,0 +1,106 @@
+<app-page-structure>
+  <div class="min-h-screen flex flex-col items-center px-4 py-12">
+    <div class="w-full max-w-[960px]">
+
+      <!-- Nav (shown when speakers + talks > 2) -->
+      @if (showNav) {
+        <app-speaker-form-nav
+          [speakerItems]="speakerNavItems"
+          [talkItems]="talkNavItems"
+        />
+      }
+
+      <a
+        (click)="onBack()"
+        class="inline-flex items-center gap-1 text-sm no-underline mb-6 back-link"
+      >
+        <mat-icon class="!text-[18px] !w-[18px] !h-[18px] leading-none">arrow_back</mat-icon>
+        Voltar
+      </a>
+
+      <p class="text-default text-accent font-semibold tracking-widest uppercase text-sm mb-2">Participe</p>
+      <h1 class="text-default text-4xl font-black mb-4 text-foreground">Submissão de palestras</h1>
+      <p class="text-default text-muted-foreground mb-2 text-justify">Faça sua inscrição no maior evento de software
+        livre.</p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">As inscrições são gratuitas.</p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">Você pode submeter:</p>
+      <ul class="text-default text-muted-foreground list-disc list-inside ml-2 mb-4 space-y-1">
+        <li>vários palestrantes para uma mesma palestra;</li>
+        <li>várias palestras para um mesmo palestrante ou grupo de palestrantes.</li>
+      </ul>
+      <p class="text-default text-muted-foreground mb-10 text-justify">
+        Ou seja: se você tem uma ideia, uma experiência ou algo interessante para compartilhar,
+        este é o lugar. Envie sua proposta e participe do evento.
+      </p>
+
+      <form class="speaker-form" [formGroup]="form" (ngSubmit)="onSubmit($event)" novalidate>
+
+        <!-- ── Speakers ──────────────────────────────────────────────────── -->
+        <div class="section-header">
+          <h2 class="text-default text-xl font-bold text-foreground">
+            {{ speakersArray.length > 1 ? 'Palestrantes' : 'Palestrante' }}
+          </h2>
+          <button mat-stroked-button type="button" (click)="addSpeaker()">
+            <mat-icon>add</mat-icon>
+
+            <span class="sm:hidden">Adicionar</span>
+            <span class="hidden sm:inline">Adicionar palestrante</span>
+          </button>
+        </div>
+
+        <div class="section-list">
+          @for (ctrl of speakersArray.controls; track $index) {
+            <app-speaker-card
+              [group]="speakerGroup($index)"
+              [idx]="$index"
+              [total]="speakersArray.length"
+              [photo]="speakerPhotos()[$index]"
+              [submitted]="submittedSig()"
+              (remove)="removeSpeaker($index)"
+              (photoChange)="updateSpeakerPhoto($index, $event)"
+            />
+          }
+        </div>
+
+        <!-- ── Talks ─────────────────────────────────────────────────────── -->
+        <div class="section-header">
+          <h2 class="text-default text-xl font-bold text-foreground">
+            {{ talksArray.length > 1 ? 'Atividades' : 'Sobre a atividade' }}
+          </h2>
+          <button mat-stroked-button type="button" (click)="addTalk()">
+            <mat-icon>add</mat-icon>
+
+            <span class="sm:hidden">Adicionar</span>
+            <span class="hidden sm:inline">Adicionar atividade</span>
+          </button>
+        </div>
+
+        <div class="section-list">
+          @for (ctrl of talksArray.controls; track $index) {
+            <app-talk-card
+              [group]="talkGroup($index)"
+              [idx]="$index"
+              [total]="talksArray.length"
+              [slideFile]="slideFiles()[$index]"
+              [submitted]="submittedSig()"
+              (remove)="removeTalk($index)"
+              (slideFileChange)="updateSlideFile($index, $event)"
+            />
+          }
+        </div>
+
+        <!-- ── Actions ───────────────────────────────────────────────────── -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Voltar
+          </button>
+          <button mat-flat-button color="primary" type="submit">
+            Revisar dados
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</app-page-structure>

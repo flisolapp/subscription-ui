@@ -1,0 +1,42 @@
+.toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 16px;
+
+  img.logo {
+    margin: 0;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  span.material-icons {
+    cursor: default;
+  }
+
+  .edition-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 100px; // mobile default
+
+    @media (min-width: 768px) {
+      max-width: 220px; // desktop
+    }
+
+    &__label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: block;
+    }
+  }
+}

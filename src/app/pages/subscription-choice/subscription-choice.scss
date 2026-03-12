@@ -1,0 +1,13 @@
+.card {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 0 30px -10px color-mix(in srgb, var(--mat-sys-primary) 45%, transparent);
+  }
+}
+
+body.darkMode {
+  .card:hover {
+    box-shadow: 0 0 35px -8px color-mix(in srgb, var(--mat-sys-primary) 65%, transparent);
+  }
+}

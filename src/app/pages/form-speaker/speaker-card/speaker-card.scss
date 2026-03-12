@@ -1,0 +1,169 @@
+// ── Card wrapper ──────────────────────────────────────────────────────────────
+.speaker-card {
+  background: color-mix(in srgb, var(--mat-sys-surface-variant) 50%, transparent);
+  border: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+// ── Card header (visible when total > 1) ─────────────────────────────────────
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  .card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .card-remove-btn {
+    color: var(--mat-sys-error, red);
+  }
+}
+
+// ── Card body (photo + fields side by side on md+) ────────────────────────────
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+// ── Photo column ──────────────────────────────────────────────────────────────
+.photo-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.photo-upload {
+  position: relative;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px dashed var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.3));
+  background: var(--mat-sys-surface-variant, #f5f5f5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 200ms;
+
+  @media (min-width: 768px) {
+    width: 10rem;
+    height: 10rem;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--mat-sys-primary);
+    outline: none;
+  }
+
+  &--error {
+    border-color: var(--mat-form-field-error-text-color, red);
+    background: color-mix(in srgb, var(--mat-sys-error, red) 10%, transparent);
+  }
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 200ms;
+  color: white;
+
+  .photo-upload:hover & {
+    opacity: 1;
+  }
+}
+
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--mat-sys-on-surface-variant);
+  transition: color 200ms;
+
+  .photo-upload:hover & {
+    color: var(--mat-sys-primary);
+  }
+
+  &--error {
+    color: var(--mat-form-field-error-text-color, red);
+  }
+}
+
+.photo-hint-text {
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-align: center;
+
+  .required {
+    color: var(--mat-form-field-error-text-color, red);
+    margin-left: 1px;
+  }
+}
+
+.photo-actions {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 0.25rem;
+
+  .photo-action-btn {
+    &--primary {
+      color: var(--mat-sys-primary);
+    }
+
+    &--warn {
+      color: var(--mat-sys-error, red);
+    }
+  }
+}
+
+.photo-error {
+  font-size: 0.75rem;
+}
+
+.photo-hint-sub {
+  font-size: 0.625rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.hidden-input {
+  display: none;
+}
+
+// ── Fields column ─────────────────────────────────────────────────────────────
+.fields-column {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.speaker-field {
+  width: 100%;
+}

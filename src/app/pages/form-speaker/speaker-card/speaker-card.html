@@ -1,0 +1,139 @@
+<div [id]="'speaker-' + idx()" class="speaker-card scroll-mt-24" [formGroup]="group()">
+
+  @if (total() > 1) {
+    <div class="card-header">
+      <span class="card-title text-default">Palestrante {{ idx() + 1 }}</span>
+      <button
+        mat-icon-button
+        type="button"
+        class="card-remove-btn"
+        (click)="remove.emit()"
+        aria-label="Remover palestrante"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  }
+
+  <div class="card-body">
+
+    <!-- ── Photo upload ──────────────────────────────────────────────────── -->
+    <div class="photo-column">
+
+      <div
+        class="photo-upload"
+        [class.photo-upload--error]="hasPhotoError"
+        (click)="photoFileInput.click()"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="photoFileInput.click()"
+        aria-label="Enviar foto do palestrante"
+      >
+        @if (photoPreviewUrl()) {
+          <img [src]="photoPreviewUrl()!" alt="Foto do palestrante" class="photo-preview" />
+          <div class="photo-overlay">
+            <mat-icon>photo_camera</mat-icon>
+          </div>
+        } @else {
+          <div class="photo-placeholder" [class.photo-placeholder--error]="hasPhotoError">
+            <mat-icon>photo_camera</mat-icon>
+            <span class="photo-hint-text">
+              Enviar foto <span class="required" aria-hidden="true">*</span>
+            </span>
+          </div>
+        }
+      </div>
+
+      <input
+        #photoFileInput
+        type="file"
+        accept="image/png,image/jpeg"
+        class="hidden-input"
+        (change)="onPhotoSelect($event)"
+      />
+
+      @if (photo()) {
+        <div class="photo-actions">
+          <button
+            mat-icon-button
+            type="button"
+            class="photo-action-btn photo-action-btn--primary"
+            (click)="downloadPhoto()"
+            title="Baixar foto"
+          >
+            <mat-icon>download</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            class="photo-action-btn photo-action-btn--warn"
+            (click)="onPhotoRemove($event)"
+            title="Remover foto"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      @if (hasPhotoError) {
+        <mat-error class="photo-error">Envie uma foto.</mat-error>
+      } @else if (!photo()) {
+        <span class="photo-hint-sub">PNG ou JPG</span>
+      }
+
+    </div>
+
+    <!-- ── Fields ────────────────────────────────────────────────────────── -->
+    <div class="fields-column">
+
+      <mat-form-field class="speaker-field">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="name" autocomplete="name" />
+        @if (hasError('name')) {
+          <mat-error>{{ getError('name') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="speaker-field">
+        <mat-label>E-mail</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="email" />
+        @if (hasError('email')) {
+          <mat-error>{{ getError('email') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="speaker-field">
+        <mat-label>Telefone</mat-label>
+        <input
+          matInput
+          formControlName="phone"
+          placeholder="(00) 00000-0000"
+          inputmode="tel"
+          autocomplete="tel"
+          (input)="applyPhoneMask($event)"
+        />
+        @if (hasError('phone')) {
+          <mat-error>{{ getError('phone') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="speaker-field">
+        <mat-label>Minicurrículo</mat-label>
+        <textarea
+          matInput
+          formControlName="minicurriculo"
+          rows="3"
+        ></textarea>
+        @if (hasError('minicurriculo')) {
+          <mat-error>{{ getError('minicurriculo') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="speaker-field">
+        <mat-label>Site (ou endereço do Currículo Lattes)</mat-label>
+        <input matInput formControlName="site" autocomplete="url" />
+      </mat-form-field>
+
+    </div>
+  </div>
+</div>

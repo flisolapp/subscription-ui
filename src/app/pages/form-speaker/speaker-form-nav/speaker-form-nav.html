@@ -1,0 +1,63 @@
+<!-- ── Desktop: fixed sidebar ──────────────────────────────────────────────── -->
+<div class="nav-sidebar hidden lg:flex">
+  <ng-container *ngTemplateOutlet="navContent" />
+</div>
+
+<!-- ── Mobile: FAB + drawer ────────────────────────────────────────────────── -->
+<div class="nav-fab lg:hidden">
+  <button
+    type="button"
+    class="fab-btn"
+    [class.fab-btn--error]="hasAnyError"
+    (click)="toggleMobile()"
+    aria-label="Abrir navegação do formulário"
+  >
+    <mat-icon>{{ mobileOpen() ? 'close' : 'menu' }}</mat-icon>
+  </button>
+
+  @if (mobileOpen()) {
+    <div class="fab-backdrop" (click)="mobileOpen.set(false)"></div>
+    <div class="fab-drawer">
+      <ng-container *ngTemplateOutlet="navContent" />
+    </div>
+  }
+</div>
+
+<!-- ── Shared nav content ───────────────────────────────────────────────────── -->
+<ng-template #navContent>
+  <p class="nav-section-label">Navegação</p>
+
+  @for (item of speakerItems(); track item.anchorId) {
+    <button
+      type="button"
+      class="nav-item"
+      [class.nav-item--error]="item.hasError"
+      (click)="scrollTo(item.anchorId)"
+      [title]="item.label"
+    >
+      <mat-icon class="nav-item-icon">person</mat-icon>
+      <span class="nav-item-label">{{ item.label }}</span>
+      @if (item.hasError) {
+        <mat-icon class="nav-item-alert">error</mat-icon>
+      }
+    </button>
+  }
+
+  <div class="nav-divider"></div>
+
+  @for (item of talkItems(); track item.anchorId) {
+    <button
+      type="button"
+      class="nav-item"
+      [class.nav-item--error]="item.hasError"
+      (click)="scrollTo(item.anchorId)"
+      [title]="item.label"
+    >
+      <mat-icon class="nav-item-icon">slideshow</mat-icon>
+      <span class="nav-item-label">{{ item.label }}</span>
+      @if (item.hasError) {
+        <mat-icon class="nav-item-alert">error</mat-icon>
+      }
+    </button>
+  }
+</ng-template>

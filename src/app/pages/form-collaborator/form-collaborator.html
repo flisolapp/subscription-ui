@@ -1,0 +1,187 @@
+<app-page-structure>
+  <div class="min-h-screen flex flex-col items-center px-4 py-12">
+    <div class="w-full max-w-[960px]">
+
+      <a
+        (click)="onBack()"
+        class="inline-flex items-center gap-1 text-sm no-underline mb-6 back-link"
+      >
+        <mat-icon class="!text-[18px] !w-[18px] !h-[18px] leading-none">arrow_back</mat-icon>
+        Voltar
+      </a>
+
+      <p class="text-default text-accent font-semibold tracking-widest uppercase text-sm mb-2">Participe</p>
+      <h1 class="text-default text-4xl font-black mb-4 text-foreground">Quero colaborar</h1>
+      <p class="text-default text-muted-foreground mb-2 text-justify">Quer ajudar a construir o FLISoL deste ano?</p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">Estamos organizando a equipe de colaboradores para
+        planejar o evento, trocar ideias e dividir as tarefas que fazem tudo acontecer.</p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">Responda ao questionário abaixo para que possamos
+        iniciar a organização e agendar as primeiras reuniões.</p>
+      <p class="text-default text-muted-foreground mb-10 text-justify">Os colaboradores da equipe de organização recebem
+        certificado de participação na organização do evento.</p>
+
+      <form class="collaborator-form" [formGroup]="form" (ngSubmit)="onSubmit($event)" novalidate>
+
+        <!-- Nome -->
+        <mat-form-field class="collaborator-field">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="name" autocomplete="name" />
+          @if (hasError('name')) {
+            <mat-error>{{ getError('name') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- E-mail -->
+        <mat-form-field class="collaborator-field">
+          <mat-label>E-mail</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          @if (hasError('email')) {
+            <mat-error>{{ getError('email') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Telefone -->
+        <mat-form-field class="collaborator-field">
+          <mat-label>Telefone</mat-label>
+          <input
+            matInput
+            formControlName="phone"
+            placeholder="(00) 00000-0000"
+            inputmode="tel"
+            autocomplete="tel"
+            (input)="applyPhoneMask($event)"
+          />
+          @if (hasError('phone')) {
+            <mat-error>{{ getError('phone') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Usa Software Livre? -->
+        <div class="radio-field">
+          <label class="radio-label text-default">
+            Usa Software Livre?
+            <span class="radio-required" aria-hidden="true">*</span>
+          </label>
+          <mat-radio-group
+            formControlName="usesFreeSoftware"
+            class="radio-group"
+            aria-label="Usa Software Livre?"
+          >
+            <mat-radio-button value="yes">Sim</mat-radio-button>
+            <mat-radio-button value="no">Não</mat-radio-button>
+          </mat-radio-group>
+          @if (hasError('usesFreeSoftware')) {
+            <mat-error class="radio-error">{{ getError('usesFreeSoftware') }}</mat-error>
+          }
+        </div>
+
+        <!-- Qual distribuição GNU/Linux você usa? -->
+        <mat-form-field class="collaborator-field">
+          <mat-label>Qual distribuição GNU/Linux você usa?</mat-label>
+          <input
+            matInput
+            formControlName="distro"
+            placeholder="Buscar distribuição..."
+            [matAutocomplete]="distroAuto"
+            autocomplete="off"
+          />
+          <mat-autocomplete #distroAuto="matAutocomplete" [displayWith]="displayLabel(distros)">
+            @for (option of filteredDistros$ | async; track option.value) {
+              <mat-option [value]="option.value" (onSelectionChange)="selectOption('distro', option)">
+                {{ option.label }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+          @if (hasError('distro')) {
+            <mat-error>{{ getError('distro') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Você é estudante? -->
+        <mat-form-field class="collaborator-field">
+          <mat-label>Você é estudante?</mat-label>
+          <input
+            matInput
+            formControlName="isStudent"
+            placeholder="Selecione sua situação..."
+            [matAutocomplete]="studentAuto"
+            autocomplete="off"
+          />
+          <mat-autocomplete #studentAuto="matAutocomplete" [displayWith]="displayLabel(studentOptions)">
+            @for (option of studentOptions; track option.value) {
+              <mat-option [value]="option.value" (onSelectionChange)="selectOption('isStudent', option)">
+                {{ option.label }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+          @if (hasError('isStudent')) {
+            <mat-error>{{ getError('isStudent') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Onde você estuda ou trabalha? -->
+        <mat-form-field class="collaborator-field">
+          <mat-label>Onde você estuda ou trabalha?</mat-label>
+          <input matInput formControlName="institution" autocomplete="organization" />
+          @if (hasError('institution')) {
+            <mat-error>{{ getError('institution') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Disponibilidade -->
+        <div class="checkbox-field">
+          <label class="checkbox-label text-default">
+            Disponibilidade
+            <span class="checkbox-required" aria-hidden="true">*</span>
+          </label>
+          <div class="checkbox-group">
+            @for (option of shiftOptions; track option.value) {
+              <mat-checkbox
+                [checked]="isShiftSelected(option.value)"
+                (change)="toggleShift(option.value)"
+              >
+                {{ option.label }}
+              </mat-checkbox>
+            }
+          </div>
+          @if (submittedSig() && selectedShifts.length === 0) {
+            <mat-error class="checkbox-error">Selecione ao menos uma disponibilidade.</mat-error>
+          }
+        </div>
+
+        <!-- Onde deseja colaborar? -->
+        <div class="checkbox-field">
+          <label class="checkbox-label text-default">
+            Onde deseja colaborar?
+            <span class="checkbox-required" aria-hidden="true">*</span>
+          </label>
+          <div class="checkbox-group">
+            @for (option of collaborationAreas; track option.value) {
+              <mat-checkbox
+                [checked]="isAreaSelected(option.value)"
+                (change)="toggleArea(option.value)"
+              >
+                {{ option.label }}
+              </mat-checkbox>
+            }
+          </div>
+          @if (submittedSig() && selectedAreas.length === 0) {
+            <mat-error class="checkbox-error">Selecione ao menos uma área de colaboração.</mat-error>
+          }
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Voltar
+          </button>
+          <button mat-flat-button color="primary" type="submit">
+            Revisar dados
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</app-page-structure>
