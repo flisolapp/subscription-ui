@@ -6,14 +6,25 @@
  *
  * A TranslateFn callback is received from FormReview so this module stays
  * free of Angular DI while still producing fully-translated labels.
+ *
+ * All option datasets are imported from the centralised form-options constants
+ * file — never from component files.
  */
 
 import { ConfirmationSection } from './form-review';
-import { DISTROS, STATES_BR, STUDENT_OPTIONS } from '../form-participant/form-participant';
-import { COLLABORATION_AREAS, SHIFT_OPTIONS } from '../form-collaborator/form-collaborator';
-import { TEMAS, TIPOS, TURNOS } from '../form-speaker/talk-card/talk-card';
+import {
+  COLLABORATION_AREAS,
+  DISTROS,
+  SHIFT_OPTIONS,
+  STATES_BR,
+  STUDENT_OPTIONS,
+  TEMAS,
+  TIPOS,
+  TURNOS,
+} from '../../constants/form-options';
 
 // ── Translate callback type ────────────────────────────────────────────────────
+
 export type TranslateFn = (key: string, params?: Record<string, unknown>) => string;
 
 // ── Lookup helpers ────────────────────────────────────────────────────────────
@@ -36,6 +47,7 @@ function lblT(
 // ══════════════════════════════════════════════════════════════════════════════
 // Participant
 // ══════════════════════════════════════════════════════════════════════════════
+
 export function buildParticipantSections(
   data: Record<string, unknown>,
   t: TranslateFn,
@@ -71,6 +83,7 @@ export function buildParticipantSections(
 // ══════════════════════════════════════════════════════════════════════════════
 // Collaborator
 // ══════════════════════════════════════════════════════════════════════════════
+
 export function buildCollaboratorSections(
   data: Record<string, unknown>,
   t: TranslateFn,
@@ -112,6 +125,7 @@ export function buildCollaboratorSections(
 // ══════════════════════════════════════════════════════════════════════════════
 // Speaker
 // ══════════════════════════════════════════════════════════════════════════════
+
 export function buildSpeakerSections(
   data: Record<string, unknown>,
   t: TranslateFn,

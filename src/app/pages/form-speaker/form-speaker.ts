@@ -9,16 +9,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageStructure } from '../../components/page-structure/page-structure';
 import { FormStorageService } from '../../services/form-storage/form-storage-service';
-import { phoneValidator, SpeakerCard } from './speaker-card/speaker-card';
+import { CustomValidators } from '../../forms/custom-validators/custom-validators';
+import { FILE_PREFIXES, STORAGE_KEYS } from '../../constants/storage-keys';
+import { SpeakerCard } from './speaker-card/speaker-card';
 import { TalkCard } from './talk-card/talk-card';
 import { NavItem, SpeakerFormNav } from './speaker-form-nav/speaker-form-nav';
 
-// ── Storage keys ──────────────────────────────────────────────────────────────
-const KEY_SPEAKERS = 'flisol_form_speakers';
-const KEY_TALKS = 'flisol_form_talks';
-const FILE_PREFIX = 'flisol_speaker_';
-
 // ── Serialisation helpers ─────────────────────────────────────────────────────
+
 interface SerializedSpeaker {
   name: string;
   email: string;
@@ -41,6 +39,7 @@ interface SerializedTalk {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
+
 @Component({
   selector: 'app-form-speaker',
   imports: [
@@ -77,6 +76,7 @@ export class FormSpeaker implements OnInit, OnDestroy {
   ) {}
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
+
   public ngOnInit(): void {
     this.form = this.fb.group({
       speakers: this.fb.array([this.createSpeakerGroup()]),
@@ -95,9 +95,11 @@ export class FormSpeaker implements OnInit, OnDestroy {
   }
 
   // ── FormArray accessors ────────────────────────────────────────────────────
+
   get speakersArray(): FormArray {
     return this.form.get('speakers') as FormArray;
   }
+
   get talksArray(): FormArray {
     return this.form.get('talks') as FormArray;
   }
@@ -105,11 +107,13 @@ export class FormSpeaker implements OnInit, OnDestroy {
   speakerGroup(i: number): FormGroup {
     return this.speakersArray.at(i) as FormGroup;
   }
+
   talkGroup(i: number): FormGroup {
     return this.talksArray.at(i) as FormGroup;
   }
 
   // ── Speaker CRUD ───────────────────────────────────────────────────────────
+
   public addSpeaker(): void {
     this.speakersArray.push(this.createSpeakerGroup());
     this.speakerPhotos.update((arr) => [...arr, null]);
@@ -126,12 +130,19 @@ export class FormSpeaker implements OnInit, OnDestroy {
       next[idx] = file;
       return next;
     });
-    if (file) this.storage.saveFile(`${FILE_PREFIX}foto_${idx}`, file).catch(console.error);
-    else this.storage.deleteFile(`${FILE_PREFIX}foto_${idx}`).catch(console.error);
+
+    const fileKey = `${FILE_PREFIXES.SPEAKER}foto_${idx}`;
+    if (file) {
+      this.storage.saveFile(fileKey, file).catch(console.error);
+    } else {
+      this.storage.deleteFile(fileKey).catch(console.error);
+    }
+
     this.saveTextDataToStorage();
   }
 
   // ── Talk CRUD ──────────────────────────────────────────────────────────────
+
   public addTalk(): void {
     this.talksArray.push(this.createTalkGroup());
     this.slideFiles.update((arr) => [...arr, null]);
@@ -148,12 +159,19 @@ export class FormSpeaker implements OnInit, OnDestroy {
       next[idx] = file;
       return next;
     });
-    if (file) this.storage.saveFile(`${FILE_PREFIX}slide_${idx}`, file).catch(console.error);
-    else this.storage.deleteFile(`${FILE_PREFIX}slide_${idx}`).catch(console.error);
+
+    const fileKey = `${FILE_PREFIXES.SPEAKER}slide_${idx}`;
+    if (file) {
+      this.storage.saveFile(fileKey, file).catch(console.error);
+    } else {
+      this.storage.deleteFile(fileKey).catch(console.error);
+    }
+
     this.saveTextDataToStorage();
   }
 
   // ── Navigation helpers ─────────────────────────────────────────────────────
+
   get showNav(): boolean {
     return this.speakersArray.length + this.talksArray.length > 2;
   }
@@ -179,6 +197,7 @@ export class FormSpeaker implements OnInit, OnDestroy {
   }
 
   // ── Submit / Back ──────────────────────────────────────────────────────────
+
   public onSubmit(event: Event): void {
     event.preventDefault();
     this.submittedSig.set(true);
@@ -209,22 +228,24 @@ export class FormSpeaker implements OnInit, OnDestroy {
   }
 
   // ── Storage ────────────────────────────────────────────────────────────────
+
   private async restoreFromStorage(): Promise<void> {
     try {
-      const savedSpeakers = this.storage.load<SerializedSpeaker[]>(KEY_SPEAKERS, []);
-      const savedTalks = this.storage.load<SerializedTalk[]>(KEY_TALKS, []);
+      const savedSpeakers = this.storage.load<SerializedSpeaker[]>(STORAGE_KEYS.SPEAKERS, []);
+      const savedTalks = this.storage.load<SerializedTalk[]>(STORAGE_KEYS.TALKS, []);
 
       if (savedSpeakers.length > 0) {
         while (this.speakersArray.length < savedSpeakers.length)
           this.speakersArray.push(this.createSpeakerGroup());
         while (this.speakersArray.length > savedSpeakers.length)
           this.speakersArray.removeAt(this.speakersArray.length - 1);
+
         savedSpeakers.forEach((s, i) => this.speakersArray.at(i).patchValue(s));
 
         const photos = await Promise.all(
           savedSpeakers.map((s, i) =>
             s.hasPhoto
-              ? this.storage.loadFile(`${FILE_PREFIX}foto_${i}`).catch(() => null)
+              ? this.storage.loadFile(`${FILE_PREFIXES.SPEAKER}foto_${i}`).catch(() => null)
               : Promise.resolve(null),
           ),
         );
@@ -236,12 +257,13 @@ export class FormSpeaker implements OnInit, OnDestroy {
           this.talksArray.push(this.createTalkGroup());
         while (this.talksArray.length > savedTalks.length)
           this.talksArray.removeAt(this.talksArray.length - 1);
+
         savedTalks.forEach((t, i) => this.talksArray.at(i).patchValue(t));
 
         const slides = await Promise.all(
           savedTalks.map((t, i) =>
             t.hasSlide
-              ? this.storage.loadFile(`${FILE_PREFIX}slide_${i}`).catch(() => null)
+              ? this.storage.loadFile(`${FILE_PREFIXES.SPEAKER}slide_${i}`).catch(() => null)
               : Promise.resolve(null),
           ),
         );
@@ -264,27 +286,30 @@ export class FormSpeaker implements OnInit, OnDestroy {
       hasPhoto: !!this.speakerPhotos()[i],
       photoName: this.speakerPhotos()[i]?.name,
     }));
+
     const talks: SerializedTalk[] = this.talksArray.getRawValue().map((t, i) => ({
       ...t,
       hasSlide: !!this.slideFiles()[i],
       slideName: this.slideFiles()[i]?.name,
     }));
-    this.storage.save(KEY_SPEAKERS, speakers);
-    this.storage.save(KEY_TALKS, talks);
+
+    this.storage.save(STORAGE_KEYS.SPEAKERS, speakers);
+    this.storage.save(STORAGE_KEYS.TALKS, talks);
   }
 
   private async clearStorage(): Promise<void> {
-    this.storage.clear(KEY_SPEAKERS);
-    this.storage.clear(KEY_TALKS);
-    await this.storage.clearFilesByPrefix(FILE_PREFIX);
+    this.storage.clear(STORAGE_KEYS.SPEAKERS);
+    this.storage.clear(STORAGE_KEYS.TALKS);
+    await this.storage.clearFilesByPrefix(FILE_PREFIXES.SPEAKER);
   }
 
   // ── Factory helpers ────────────────────────────────────────────────────────
+
   private createSpeakerGroup(): FormGroup {
     return this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, phoneValidator]],
+      phone: ['', [Validators.required, CustomValidators.phoneValidator]],
       minicurriculo: ['', [Validators.required, Validators.minLength(10)]],
       site: [''],
     });

@@ -1,13 +1,6 @@
 import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
@@ -17,48 +10,25 @@ import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { debounceTime, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageStructure } from '../../components/page-structure/page-structure';
-import { DISTROS, SelectOption, STUDENT_OPTIONS } from '../form-participant/form-participant';
 import { FormStorageService } from '../../services/form-storage/form-storage-service';
+import { CustomValidators } from '../../forms/custom-validators/custom-validators';
+import {
+  buildDisplayLabel,
+  filterOptions,
+  formatPhone,
+  getControlError,
+} from '../../forms/form-field/form-field';
+import {
+  COLLABORATION_AREAS,
+  DISTROS,
+  SelectOption,
+  SHIFT_OPTIONS,
+  STUDENT_OPTIONS,
+} from '../../constants/form-options';
+import { STORAGE_KEYS } from '../../constants/storage-keys';
 
-// ── Storage keys ──────────────────────────────────────────────────────────────
-const KEY_COLLABORATOR = 'flisol_form_collaborator';
-const KEY_SHIFTS = 'flisol_form_collaborator_disp';
-const KEY_AREAS = 'flisol_form_collaborator_grupos';
-
-// ── Phone Validator ───────────────────────────────────────────────────────────
-function phoneValidator(control: AbstractControl): ValidationErrors | null {
-  const raw = (control.value ?? '').replace(/\D/g, '');
-  if (!raw) return null;
-  return raw.length >= 10 && raw.length <= 11 ? null : { phoneInvalid: true };
-}
-
-// ── Static data - labels are translation keys ─────────────────────────────────
-export const SHIFT_OPTIONS: SelectOption[] = [
-  { value: '1', label: 'formCollaborator.shifts.morningAll' },
-  { value: '2', label: 'formCollaborator.shifts.afternoonAll' },
-  { value: '3', label: 'formCollaborator.shifts.eveningAll' },
-  { value: '4', label: 'formCollaborator.shifts.saturdayMorning' },
-  { value: '5', label: 'formCollaborator.shifts.saturdayAfternoon' },
-];
-
-export const COLLABORATION_AREAS: SelectOption[] = [
-  { value: '1', label: 'formCollaborator.areas.group1' },
-  { value: '2', label: 'formCollaborator.areas.group2' },
-  { value: '3', label: 'formCollaborator.areas.group3' },
-  { value: '4', label: 'formCollaborator.areas.group4' },
-  { value: '5', label: 'formCollaborator.areas.group5' },
-  { value: '6', label: 'formCollaborator.areas.group6' },
-  { value: '7', label: 'formCollaborator.areas.group7' },
-  { value: '8', label: 'formCollaborator.areas.group8' },
-  { value: '9', label: 'formCollaborator.areas.group9' },
-  { value: '10', label: 'formCollaborator.areas.group10' },
-  { value: '11', label: 'formCollaborator.areas.group11' },
-  { value: '12', label: 'formCollaborator.areas.group12' },
-  { value: '13', label: 'formCollaborator.areas.group13' },
-];
-
-// ── Component ─────────────────────────────────────────────────────────────────
 @Component({
   selector: 'app-form-collaborator',
   imports: [
@@ -110,11 +80,12 @@ export class FormCollaborator implements OnInit, OnDestroy {
   ) {}
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
+
   public ngOnInit(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, phoneValidator]],
+      phone: ['', [Validators.required, CustomValidators.phoneValidator]],
       usesFreeSoftware: ['', Validators.required],
       distro: ['', Validators.required],
       isStudent: ['', Validators.required],
@@ -124,7 +95,7 @@ export class FormCollaborator implements OnInit, OnDestroy {
     this.filteredDistros$ = this.form.get('distro')!.valueChanges.pipe(
       startWith(''),
       takeUntil(this.destroy$),
-      map((v) => this._filter(v ?? '', this.distros)),
+      map((v) => filterOptions(v ?? '', this.distros)),
     );
 
     this.restoreFromStorage();
@@ -138,17 +109,14 @@ export class FormCollaborator implements OnInit, OnDestroy {
   }
 
   // ── Input masks ────────────────────────────────────────────────────────────
-  public applyPhoneMask(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let v = input.value.replace(/\D/g, '').slice(0, 11);
-    if (v.length > 10) v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
-    else if (v.length > 6) v = `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`;
-    else if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
-    else if (v.length > 0) v = `(${v}`;
-    this.form.get('phone')!.setValue(v, { emitEvent: true });
+
+  public onPhoneInput(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    this.form.get('phone')!.setValue(formatPhone(raw), { emitEvent: true });
   }
 
   // ── Checkbox helpers ───────────────────────────────────────────────────────
+
   public isShiftSelected(value: string): boolean {
     return this.selectedShifts.includes(value);
   }
@@ -172,12 +140,9 @@ export class FormCollaborator implements OnInit, OnDestroy {
   }
 
   // ── Autocomplete helpers ───────────────────────────────────────────────────
+
   public displayLabel(options: SelectOption[]): (value: string) => string {
-    return (value: string) => {
-      const found = options.find((o) => o.value === value);
-      if (!found) return value ?? '';
-      return this.translate.instant(found.label);
-    };
+    return buildDisplayLabel(options, this.translate);
   }
 
   public selectOption(controlName: string, option: SelectOption): void {
@@ -185,18 +150,9 @@ export class FormCollaborator implements OnInit, OnDestroy {
   }
 
   // ── Validation helpers ─────────────────────────────────────────────────────
+
   public getError(controlName: string): string | null {
-    const ctrl = this.form.get(controlName);
-    if (!ctrl) return null;
-    if (!this.submittedSig() && !ctrl.touched) return null;
-    if (ctrl.hasError('required')) return this.translate.instant('common.required');
-    if (ctrl.hasError('minlength'))
-      return this.translate.instant('common.minLength', {
-        min: ctrl.errors!['minlength'].requiredLength,
-      });
-    if (ctrl.hasError('email')) return this.translate.instant('common.invalidEmail');
-    if (ctrl.hasError('phoneInvalid')) return this.translate.instant('common.invalidPhone');
-    return null;
+    return getControlError(this.form.get(controlName), this.submittedSig(), this.translate);
   }
 
   public hasError(controlName: string): boolean {
@@ -204,6 +160,7 @@ export class FormCollaborator implements OnInit, OnDestroy {
   }
 
   // ── Submit / Back ──────────────────────────────────────────────────────────
+
   public onSubmit(event: Event): void {
     event.preventDefault();
     this.submittedSig.set(true);
@@ -227,17 +184,18 @@ export class FormCollaborator implements OnInit, OnDestroy {
   }
 
   // ── Storage ────────────────────────────────────────────────────────────────
+
   private restoreFromStorage(): void {
     try {
-      const savedForm = this.storage.load<Record<string, unknown>>(KEY_COLLABORATOR, {});
+      const savedForm = this.storage.load<Record<string, unknown>>(STORAGE_KEYS.COLLABORATOR, {});
       if (Object.keys(savedForm).length > 0) {
         this.form.patchValue(savedForm, { emitEvent: false });
       }
 
-      const savedShifts = this.storage.load<string[]>(KEY_SHIFTS, []);
+      const savedShifts = this.storage.load<string[]>(STORAGE_KEYS.COLLABORATOR_SHIFTS, []);
       if (savedShifts.length) this.selectedShifts = savedShifts;
 
-      const savedAreas = this.storage.load<string[]>(KEY_AREAS, []);
+      const savedAreas = this.storage.load<string[]>(STORAGE_KEYS.COLLABORATOR_AREAS, []);
       if (savedAreas.length) this.selectedAreas = savedAreas;
     } catch (err) {
       console.error('FormCollaborator: error restoring storage', err);
@@ -251,26 +209,17 @@ export class FormCollaborator implements OnInit, OnDestroy {
   }
 
   private saveFormToStorage(): void {
-    this.storage.save(KEY_COLLABORATOR, this.form.getRawValue());
+    this.storage.save(STORAGE_KEYS.COLLABORATOR, this.form.getRawValue());
   }
 
   private saveCheckboxesToStorage(): void {
-    this.storage.save(KEY_SHIFTS, this.selectedShifts);
-    this.storage.save(KEY_AREAS, this.selectedAreas);
+    this.storage.save(STORAGE_KEYS.COLLABORATOR_SHIFTS, this.selectedShifts);
+    this.storage.save(STORAGE_KEYS.COLLABORATOR_AREAS, this.selectedAreas);
   }
 
   private clearStorage(): void {
-    this.storage.clear(KEY_COLLABORATOR);
-    this.storage.clear(KEY_SHIFTS);
-    this.storage.clear(KEY_AREAS);
-  }
-
-  // ── Private ────────────────────────────────────────────────────────────────
-  private _filter(val: string, list: SelectOption[]): SelectOption[] {
-    if (!val || list.some((o) => o.value === val)) return list;
-    const q = val.toLowerCase();
-    return list.filter(
-      (o) => o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q),
-    );
+    this.storage.clear(STORAGE_KEYS.COLLABORATOR);
+    this.storage.clear(STORAGE_KEYS.COLLABORATOR_SHIFTS);
+    this.storage.clear(STORAGE_KEYS.COLLABORATOR_AREAS);
   }
 }

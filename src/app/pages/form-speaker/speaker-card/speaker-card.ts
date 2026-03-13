@@ -8,21 +8,15 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { AbstractControl, FormGroup, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-// ── Phone validator ───────────────────────────────────────────────────────────
-export function phoneValidator(control: AbstractControl): ValidationErrors | null {
-  const raw = (control.value ?? '').replace(/\D/g, '');
-  if (!raw) return null;
-  return raw.length >= 10 && raw.length <= 11 ? null : { phoneInvalid: true };
-}
+import { formatPhone, getControlError } from '../../../forms/form-field/form-field';
 
-// ── Component ─────────────────────────────────────────────────────────────────
 @Component({
   selector: 'app-speaker-card',
   imports: [
@@ -57,10 +51,12 @@ export class SpeakerCard implements OnDestroy {
   constructor(private readonly translate: TranslateService) {
     effect(() => {
       const file = this.photo();
+
       if (this.previousUrl) {
         URL.revokeObjectURL(this.previousUrl);
         this.previousUrl = null;
       }
+
       if (file) {
         this.previousUrl = URL.createObjectURL(file);
         this.photoPreviewUrl.set(this.previousUrl);
@@ -74,18 +70,15 @@ export class SpeakerCard implements OnDestroy {
     if (this.previousUrl) URL.revokeObjectURL(this.previousUrl);
   }
 
-  // ── Phone mask ─────────────────────────────────────────────────────────────
-  applyPhoneMask(event: Event): void {
-    const el = event.target as HTMLInputElement;
-    let v = el.value.replace(/\D/g, '').slice(0, 11);
-    if (v.length > 10) v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
-    else if (v.length > 6) v = `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`;
-    else if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
-    else if (v.length > 0) v = `(${v}`;
-    this.group().get('phone')!.setValue(v, { emitEvent: true });
+  // ── Input masks ────────────────────────────────────────────────────────────
+
+  onPhoneInput(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    this.group().get('phone')!.setValue(formatPhone(raw), { emitEvent: true });
   }
 
   // ── File input ─────────────────────────────────────────────────────────────
+
   onPhotoSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.photoChange.emit(file);
@@ -105,22 +98,13 @@ export class SpeakerCard implements OnDestroy {
   }
 
   // ── Validation helpers ─────────────────────────────────────────────────────
-  hasError(controlName: string): boolean {
-    return !!this.getError(controlName);
-  }
 
   getError(controlName: string): string | null {
-    const ctrl = this.group().get(controlName);
-    if (!ctrl) return null;
-    if (!this.submitted() && !ctrl.touched) return null;
-    if (ctrl.hasError('required')) return this.translate.instant('common.required');
-    if (ctrl.hasError('minlength'))
-      return this.translate.instant('common.minLength', {
-        min: ctrl.errors!['minlength'].requiredLength,
-      });
-    if (ctrl.hasError('email')) return this.translate.instant('common.invalidEmail');
-    if (ctrl.hasError('phoneInvalid')) return this.translate.instant('common.invalidPhone');
-    return null;
+    return getControlError(this.group().get(controlName), this.submitted(), this.translate);
+  }
+
+  hasError(controlName: string): boolean {
+    return !!this.getError(controlName);
   }
 
   get hasPhotoError(): boolean {

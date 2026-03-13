@@ -35,7 +35,7 @@
             placeholder="000.000.000-00"
             inputmode="numeric"
             autocomplete="off"
-            (input)="applyFederalCodeMask($event)"
+            (input)="onFederalCodeInput($event)"
           />
           <mat-hint>{{ 'formParticipant.cpfHint' | translate }}</mat-hint>
           @if (hasError('federalCode')) {
@@ -61,7 +61,7 @@
             placeholder="(00) 00000-0000"
             inputmode="tel"
             autocomplete="tel"
-            (input)="applyPhoneMask($event)"
+            (input)="onPhoneInput($event)"
           />
           @if (hasError('phone')) {
             <mat-error>{{ getError('phone') }}</mat-error>

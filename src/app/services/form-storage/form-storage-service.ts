@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SubscriptionType } from '../../models/subscription-type/subscription-type';
+import { FILE_PREFIXES, STORAGE_KEYS } from '../../constants/storage-keys';
 
 const DB_NAME = 'flisol_forms';
 const DB_VERSION = 1;
@@ -10,6 +11,7 @@ const STORE_NAME = 'files';
 })
 export class FormStorageService {
   // ── IndexedDB ──────────────────────────────────────────────────────────────
+
   private openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -73,6 +75,7 @@ export class FormStorageService {
   }
 
   // ── localStorage ──────────────────────────────────────────────────────────
+
   save(key: string, data: unknown): void {
     try {
       localStorage.setItem(key, JSON.stringify(data));
@@ -96,29 +99,28 @@ export class FormStorageService {
 
   async clearAll(): Promise<void> {
     [
-      'flisol_form_participant',
-      'flisol_form_speakers',
-      'flisol_form_talks',
-      'flisol_form_collaborator',
-      'flisol_form_collaborator_disp',
-      'flisol_form_collaborator_grupos',
+      STORAGE_KEYS.PARTICIPANT,
+      STORAGE_KEYS.SPEAKERS,
+      STORAGE_KEYS.TALKS,
+      STORAGE_KEYS.COLLABORATOR,
+      STORAGE_KEYS.COLLABORATOR_SHIFTS,
+      STORAGE_KEYS.COLLABORATOR_AREAS,
     ].forEach((k) => localStorage.removeItem(k));
-    await this.clearFilesByPrefix('flisol_speaker_');
+
+    await this.clearFilesByPrefix(FILE_PREFIXES.SPEAKER);
   }
 
   getActiveSubscriptionType(): SubscriptionType | null {
-    if (localStorage.getItem('flisol_form_participant')) {
-      return 'participant';
-    }
+    if (localStorage.getItem(STORAGE_KEYS.PARTICIPANT)) return 'participant';
 
-    if (localStorage.getItem('flisol_form_speakers') || localStorage.getItem('flisol_form_talks')) {
+    if (localStorage.getItem(STORAGE_KEYS.SPEAKERS) || localStorage.getItem(STORAGE_KEYS.TALKS)) {
       return 'speaker';
     }
 
     if (
-      localStorage.getItem('flisol_form_collaborator') ||
-      localStorage.getItem('flisol_form_collaborator_disp') ||
-      localStorage.getItem('flisol_form_collaborator_grupos')
+      localStorage.getItem(STORAGE_KEYS.COLLABORATOR) ||
+      localStorage.getItem(STORAGE_KEYS.COLLABORATOR_SHIFTS) ||
+      localStorage.getItem(STORAGE_KEYS.COLLABORATOR_AREAS)
     ) {
       return 'collaborator';
     }

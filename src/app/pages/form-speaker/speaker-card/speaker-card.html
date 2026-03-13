@@ -121,7 +121,7 @@
           placeholder="(00) 00000-0000"
           inputmode="tel"
           autocomplete="tel"
-          (input)="applyPhoneMask($event)"
+          (input)="onPhoneInput($event)"
         />
         @if (hasError('phone')) {
           <mat-error>{{ getError('phone') }}</mat-error>

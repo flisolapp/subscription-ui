@@ -5,7 +5,8 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { LanguageService } from '../../services/language/language-service';
+import { Language, LanguageService } from '../../services/language/language-service';
+import { STORAGE_KEYS } from '../../constants/storage-keys';
 
 @Component({
   selector: 'app-toolbar',
@@ -26,9 +27,9 @@ export class Toolbar implements OnInit {
   /* v8 ignore next -- @preserve */
   public darkMode = signal<boolean>(false);
   /* v8 ignore next -- @preserve */
-  public language = signal<any>(null);
+  public language = signal<Language | null>(null);
 
-  constructor(public languageService: LanguageService) {}
+  constructor(public readonly languageService: LanguageService) {}
 
   public ngOnInit(): void {
     this.detectAndLoadColorScheme();
@@ -38,9 +39,9 @@ export class Toolbar implements OnInit {
   public detectAndLoadColorScheme(): void {
     let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    const darkModeFromStorage = localStorage.getItem('flisolapp.DarkMode');
-    if (darkModeFromStorage !== null) {
-      isDark = darkModeFromStorage === 'true';
+    const stored = localStorage.getItem(STORAGE_KEYS.DARK_MODE);
+    if (stored !== null) {
+      isDark = stored === 'true';
     }
 
     this.darkMode.set(isDark);
@@ -49,26 +50,20 @@ export class Toolbar implements OnInit {
 
   public toggleColorScheme(): void {
     this.darkMode.update((value) => !value);
-    localStorage.setItem('flisolapp.DarkMode', this.darkMode() ? 'true' : 'false');
+    localStorage.setItem(STORAGE_KEYS.DARK_MODE, String(this.darkMode()));
     this.applyColorScheme();
   }
 
-  private applyColorScheme(): void {
-    const darkClassName = 'darkMode';
+  public selectLanguage(item: Language): void {
+    this.language.set(item);
+    this.languageService.setSelected(item);
+  }
 
-    if (this.darkMode()) {
-      document.body.classList.add(darkClassName);
-    } else {
-      document.body.classList.remove(darkClassName);
-    }
+  private applyColorScheme(): void {
+    document.body.classList.toggle('darkMode', this.darkMode());
 
     if (window.flutter_inappwebview) {
       window.flutter_inappwebview.callHandler('setDarkMode', this.darkMode());
     }
-  }
-
-  public selectLanguage(item: any): void {
-    this.language.set(item);
-    this.languageService.setSelected(item);
   }
 }

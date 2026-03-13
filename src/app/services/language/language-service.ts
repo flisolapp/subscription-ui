@@ -1,116 +1,114 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-// import {MessageService, PrimeNGConfig} from 'primeng/api';
 import { EventEmitterService } from '../event-emitter/event-emitter-service';
+import { STORAGE_KEYS } from '../../constants/storage-keys';
+
+// ── Language model ────────────────────────────────────────────────────────────
+
+export interface Language {
+  name: string;
+  code: string;
+  flag?: string;
+}
+
+// ── Supported languages ───────────────────────────────────────────────────────
+
+const SUPPORTED_LANGUAGES: Language[] = [
+  { name: 'English (USA)', code: 'en', flag: 'US' },
+  { name: 'Español (España)', code: 'es', flag: 'ES' },
+  { name: 'Português (Brasil)', code: 'pt-BR', flag: 'BR' },
+];
+
+// ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({
   providedIn: 'root',
 })
 export class LanguageService {
-  private static LANGUAGE_KEY: string = 'flisolapp.Language';
-  public static LANGUAGES: any[] = [
-    { name: 'English (USA)', code: 'en', flag: 'US' },
-    { name: 'Español (España)', code: 'es', flag: 'ES' },
-    { name: 'Português (Brasil)', code: 'pt-BR', flag: 'BR' },
-  ];
-  private selected: any = null;
+  private selected: Language | null = null;
+  private _locale = 'en';
 
-  private _locale: string = 'en';
+  constructor(private readonly translate: TranslateService) {}
+
+  get locale(): string {
+    return this._locale;
+  }
 
   set locale(value: string) {
     this._locale = value;
   }
 
-  get locale(): string {
-    return this._locale || 'en';
-  }
-
-  constructor(
-    // private config: PrimeNGConfig,
-    private translate: TranslateService,
-    // private messageService: MessageService
-  ) {}
+  // ── Initialisation ─────────────────────────────────────────────────────────
 
   init(): void {
-    // let language = window.navigator.userLanguage || window.navigator.language;
-    const browserLang: string | undefined = this.translate.getBrowserLang();
-    let language: string = 'en';
+    const browserLang = this.translate.getBrowserLang();
+    if (!browserLang) return;
 
-    if (browserLang !== undefined) {
-      // console.log(browserLang);
+    let code = browserLang.startsWith('pt') ? 'pt-BR' : 'en';
 
-      if (browserLang.substring(0, 2) === 'pt')
-        //
-        language = 'pt-BR';
+    const stored = this.loadStoredLanguage();
+    if (stored) code = stored.code;
 
-      try {
-        let slanguage: string | null = localStorage.getItem(LanguageService.LANGUAGE_KEY);
+    this.selected = SUPPORTED_LANGUAGES.find((l) => l.code === code) ?? SUPPORTED_LANGUAGES[0];
 
-        if (slanguage !== null) {
-          let oLanguage = JSON.parse(slanguage);
-          language = oLanguage.code;
-        }
-      } catch (e) {
-        // Do nothing.
-      }
+    this.translate.addLangs(['en', 'pt-BR']);
+    this.translate.use(this.selected.code);
+    this.translate.setDefaultLang(this.selected.code);
 
-      for (
-        let i = 0;
-        i < LanguageService.LANGUAGES.length;
-        i++ //
-      )
-        if (LanguageService.LANGUAGES[i].code === language)
-          //
-          this.selected = LanguageService.LANGUAGES[i];
+    this._locale = this.selected.code;
 
-      this.translate.addLangs(['en', 'pt-BR']);
-      // this.translate.setDefaultLang('en');
-
-      // this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
-      this._locale = language;
-      this.translate.use(language);
-      this.translate.setDefaultLang(language);
-      // this.translate.get('primeng').subscribe(res => this.config.setTranslation(res));
-      localStorage.setItem(LanguageService.LANGUAGE_KEY, JSON.stringify(this.selected));
-      EventEmitterService.get('set-language').emit(this.selected.code);
-    }
+    this.persistSelected();
+    EventEmitterService.get('set-language').emit(this.selected.code);
   }
 
-  getLanguages(): any[] {
-    return LanguageService.LANGUAGES;
+  // ── Public API ─────────────────────────────────────────────────────────────
+
+  getLanguages(): Language[] {
+    return SUPPORTED_LANGUAGES;
   }
 
-  getSelected(): any {
+  getSelected(): Language | null {
     return this.selected;
   }
 
-  setSelected(language: any): void {
+  setSelected(language: Language): void {
     this.selected = language;
-    // this.messageService.clear();
-    this.translate.use(this.selected.code);
-    // this.translate.get('primeng').subscribe(res => this.config.setTranslation(res));
-    localStorage.setItem(LanguageService.LANGUAGE_KEY, JSON.stringify(this.selected));
-    EventEmitterService.get('set-language').emit(this.selected.code);
-
-    // // DONE: Only reloads because when change the language, the pipe Date doesn't updates
-    // window.location.reload();
+    this.translate.use(language.code);
+    this._locale = language.code;
+    this.persistSelected();
+    EventEmitterService.get('set-language').emit(language.code);
   }
 
+  // ── Static helper ──────────────────────────────────────────────────────────
+
+  /** Reads the persisted language code without instantiating the service. */
   static getLanguageCode(): string {
     try {
-      const slanguage: string | null = localStorage.getItem(LanguageService.LANGUAGE_KEY);
-      // console.log(slanguage);
-
-      if (slanguage !== null) {
-        const language = JSON.parse(slanguage);
-        // console.log(language);
-        return language.code;
+      const raw = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
+      if (raw) {
+        const lang = JSON.parse(raw) as Language;
+        return lang.code ?? '';
       }
-    } catch (e) {
-      // console.error(e);
-      // Do nothing.
+    } catch {
+      // Silently ignore parse errors
     }
-
     return '';
+  }
+
+  // ── Private ────────────────────────────────────────────────────────────────
+
+  private loadStoredLanguage(): Language | null {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
+      return raw ? (JSON.parse(raw) as Language) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private persistSelected(): void {
+    if (this.selected) {
+      localStorage.setItem(STORAGE_KEYS.LANGUAGE, JSON.stringify(this.selected));
+    }
   }
 }

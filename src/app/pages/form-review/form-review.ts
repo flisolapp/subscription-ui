@@ -6,7 +6,9 @@ import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageStructure } from '../../components/page-structure/page-structure';
+import { SubscriptionType } from '../../models/subscription-type/subscription-type';
 import {
   SubscriptionError,
   SubscriptionService,
@@ -47,9 +49,7 @@ export interface FieldRow {
 
 // ── Form-type config ──────────────────────────────────────────────────────────
 
-type FormType = 'participant' | 'speaker' | 'collaborator';
-
-const FORM_CONFIG: Record<FormType, { titleKey: string; backRoute: string }> = {
+const FORM_CONFIG: Record<SubscriptionType, { titleKey: string; backRoute: string }> = {
   participant: { titleKey: 'formReview.titles.participant', backRoute: '/subscribe/participant' },
   speaker: { titleKey: 'formReview.titles.speaker', backRoute: '/subscribe/speaker' },
   collaborator: {
@@ -57,8 +57,6 @@ const FORM_CONFIG: Record<FormType, { titleKey: string; backRoute: string }> = {
     backRoute: '/subscribe/collaborator',
   },
 };
-
-// ── Snackbar helpers ──────────────────────────────────────────────────────────
 
 const SNACK_DURATION = 5_000;
 
@@ -72,9 +70,10 @@ const SNACK_DURATION = 5_000;
 })
 export class FormReview implements OnInit {
   // ── State ─────────────────────────────────────────────────────────────────
+
   readonly loading = signal(false);
   readonly sections = signal<ConfirmationSection[]>([]);
-  readonly formType = signal<FormType>('participant');
+  readonly formType = signal<SubscriptionType>('participant');
 
   /**
    * 0–100 during an active upload (drives the determinate progress bar).
@@ -95,9 +94,13 @@ export class FormReview implements OnInit {
   ) {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
+
   ngOnInit(): void {
-    const parentPath = this.route.snapshot.parent?.routeConfig?.path as FormType | undefined;
-    const type: FormType = parentPath && parentPath in FORM_CONFIG ? parentPath : 'participant';
+    const parentPath = this.route.snapshot.parent?.routeConfig?.path as
+      | SubscriptionType
+      | undefined;
+    const type: SubscriptionType =
+      parentPath && parentPath in FORM_CONFIG ? parentPath : 'participant';
     this.formType.set(type);
 
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
@@ -136,11 +139,7 @@ export class FormReview implements OnInit {
         rows.push({ type: 'pair', first: curr, second: next });
         i += 2;
       } else {
-        rows.push({
-          type: 'single',
-          field: curr,
-          fullWidth: !!curr.fullWidth,
-        });
+        rows.push({ type: 'single', field: curr, fullWidth: !!curr.fullWidth });
         i++;
       }
     }
@@ -155,6 +154,7 @@ export class FormReview implements OnInit {
   }
 
   // ── 1. onConfirm - production path ────────────────────────────────────────
+
   onConfirm(): void {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
@@ -163,7 +163,7 @@ export class FormReview implements OnInit {
     this.uploadPercent.set(null);
 
     this.subscriptionService.submitWithProgress(this.formType(), payload).subscribe({
-      next: ({ percent, done, response }) => {
+      next: ({ percent, done }) => {
         this.uploadPercent.set(percent);
 
         if (done) {
@@ -187,6 +187,7 @@ export class FormReview implements OnInit {
   }
 
   // ── 2. onConfirmSimple - fallback / lower-overhead path ───────────────────
+
   async onConfirmSimple(): Promise<void> {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
@@ -215,6 +216,7 @@ export class FormReview implements OnInit {
   }
 
   // ── 3. onConfirmDry - dev/debug path ──────────────────────────────────────
+
   async onConfirmDry(): Promise<void> {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
@@ -281,7 +283,10 @@ export class FormReview implements OnInit {
     console.error('[FormReview] Unexpected error:', err);
   }
 
-  private buildSections(type: FormType, payload: Record<string, unknown>): ConfirmationSection[] {
+  private buildSections(
+    type: SubscriptionType,
+    payload: Record<string, unknown>,
+  ): ConfirmationSection[] {
     const t: TranslateFn = (key, params) => this.translate.instant(key, params);
     switch (type) {
       case 'participant':
