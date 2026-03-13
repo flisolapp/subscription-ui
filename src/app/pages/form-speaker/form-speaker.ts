@@ -5,11 +5,12 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageStructure } from '../../components/page-structure/page-structure';
 import { FormStorageService } from '../../services/form-storage/form-storage-service';
 import { phoneValidator, SpeakerCard } from './speaker-card/speaker-card';
-import { TalkCard, TEMAS } from './talk-card/talk-card';
+import { TalkCard } from './talk-card/talk-card';
 import { NavItem, SpeakerFormNav } from './speaker-form-nav/speaker-form-nav';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
@@ -45,6 +46,7 @@ interface SerializedTalk {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    TranslatePipe,
     PageStructure,
     SpeakerCard,
     TalkCard,
@@ -71,6 +73,7 @@ export class FormSpeaker implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly router: Router,
     private readonly storage: FormStorageService,
+    private readonly translate: TranslateService,
   ) {}
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -157,7 +160,9 @@ export class FormSpeaker implements OnInit, OnDestroy {
 
   get speakerNavItems(): NavItem[] {
     return this.speakersArray.controls.map((ctrl, i) => ({
-      label: (ctrl.get('name')?.value as string) || `Palestrante ${i + 1}`,
+      label:
+        (ctrl.get('name')?.value as string) ||
+        this.translate.instant('formSpeaker.speakerCard.title', { n: i + 1 }),
       hasError: this.submittedSig() && (ctrl.invalid || !this.speakerPhotos()[i]),
       anchorId: `speaker-${i}`,
     }));
@@ -165,7 +170,9 @@ export class FormSpeaker implements OnInit, OnDestroy {
 
   get talkNavItems(): NavItem[] {
     return this.talksArray.controls.map((ctrl, i) => ({
-      label: (ctrl.get('titulo')?.value as string) || `Atividade ${i + 1}`,
+      label:
+        (ctrl.get('titulo')?.value as string) ||
+        this.translate.instant('formSpeaker.talkCard.title', { n: i + 1 }),
       hasError: this.submittedSig() && ctrl.invalid,
       anchorId: `talk-${i}`,
     }));
@@ -187,9 +194,9 @@ export class FormSpeaker implements OnInit, OnDestroy {
             ...s,
             photo: this.speakerPhotos()[i],
           })),
+          // temaLabel removed - the builder resolves it via TEMAS lookup
           talks: this.talksArray.getRawValue().map((t, i) => ({
             ...t,
-            temaLabel: TEMAS.find((x) => x.value === t['tema'])?.label ?? t['tema'],
             slideFile: this.slideFiles()[i],
           })),
         },

@@ -3,106 +3,166 @@
  *
  * Pure functions that convert the raw form payload (passed via router state)
  * into a ConfirmationSection[] ready for <app-form-review>.
+ *
+ * A TranslateFn callback is received from FormReview so this module stays
+ * free of Angular DI while still producing fully-translated labels.
  */
 
 import { ConfirmationSection } from './form-review';
 import { DISTROS, STATES_BR, STUDENT_OPTIONS } from '../form-participant/form-participant';
 import { COLLABORATION_AREAS, SHIFT_OPTIONS } from '../form-collaborator/form-collaborator';
+import { TEMAS, TIPOS, TURNOS } from '../form-speaker/talk-card/talk-card';
 
-// ── Shared lookup helper ───────────────────────────────────────────────────────
+// ── Translate callback type ────────────────────────────────────────────────────
+export type TranslateFn = (key: string, params?: Record<string, unknown>) => string;
+
+// ── Lookup helpers ────────────────────────────────────────────────────────────
+
+/** Resolves a plain-text label (e.g. distro names, state names). */
 function lbl(options: ReadonlyArray<{ value: string; label: string }>, value: unknown): string {
-  return options.find((o) => o.value === String(value ?? ''))?.label ?? String(value ?? '—');
+  return options.find((o) => o.value === String(value ?? ''))?.label ?? String(value ?? '-');
+}
+
+/** Resolves a translation-key label via the translate callback. */
+function lblT(
+  options: ReadonlyArray<{ value: string; label: string }>,
+  value: unknown,
+  t: TranslateFn,
+): string {
+  const found = options.find((o) => o.value === String(value ?? ''));
+  return found ? t(found.label) : String(value ?? '-');
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// Participant  →  title "Inscreva-se"
+// Participant
 // ══════════════════════════════════════════════════════════════════════════════
-export function buildParticipantSections(data: Record<string, unknown>): ConfirmationSection[] {
+export function buildParticipantSections(
+  data: Record<string, unknown>,
+  t: TranslateFn,
+): ConfirmationSection[] {
   return [
     {
       fields: [
-        { label: 'Nome', value: String(data['name'] ?? '') },
-        { label: 'CPF', value: String(data['federalCode'] ?? '') },
-        { label: 'E-mail', value: String(data['email'] ?? ''), inline: true },
-        { label: 'Telefone', value: String(data['phone'] ?? ''), inline: true },
-        { label: 'Usa software livre', value: data['usesFreeSoftware'] === 'sim' ? 'Sim' : 'Não' },
-        { label: 'Distribuição Linux', value: lbl(DISTROS, data['distro']) },
-        { label: 'Situação acadêmica', value: lbl(STUDENT_OPTIONS, data['isStudent']) },
-        { label: 'Instituição', value: String(data['institution'] ?? ''), inline: true },
-        { label: 'Curso', value: String(data['course'] ?? ''), inline: true },
-        { label: 'Estado', value: lbl(STATES_BR, data['state']) },
+        { label: t('formReview.fields.name'), value: String(data['name'] ?? '') },
+        { label: t('formReview.fields.cpf'), value: String(data['federalCode'] ?? '') },
+        { label: t('formReview.fields.email'), value: String(data['email'] ?? ''), inline: true },
+        { label: t('formReview.fields.phone'), value: String(data['phone'] ?? ''), inline: true },
+        {
+          label: t('formReview.fields.usesFreeSoftware'),
+          value: data['usesFreeSoftware'] === 'yes' ? t('common.yes') : t('common.no'),
+        },
+        { label: t('formReview.fields.distro'), value: lbl(DISTROS, data['distro']) },
+        {
+          label: t('formReview.fields.academicStatus'),
+          value: lblT(STUDENT_OPTIONS, data['isStudent'], t),
+        },
+        {
+          label: t('formReview.fields.institution'),
+          value: String(data['institution'] ?? ''),
+          inline: true,
+        },
+        { label: t('formReview.fields.course'), value: String(data['course'] ?? ''), inline: true },
+        { label: t('formReview.fields.state'), value: lbl(STATES_BR, data['state']) },
       ],
     },
   ];
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// Collaborator  →  title "Quero colaborar"
+// Collaborator
 // ══════════════════════════════════════════════════════════════════════════════
-export function buildCollaboratorSections(data: Record<string, unknown>): ConfirmationSection[] {
+export function buildCollaboratorSections(
+  data: Record<string, unknown>,
+  t: TranslateFn,
+): ConfirmationSection[] {
   const shifts = (data['shifts'] as string[] | undefined) ?? [];
   const areas = (data['collaborationAreas'] as string[] | undefined) ?? [];
 
   return [
     {
       fields: [
-        { label: 'Nome', value: String(data['name'] ?? '') },
-        { label: 'E-mail', value: String(data['email'] ?? ''), inline: true },
-        { label: 'Telefone', value: String(data['phone'] ?? ''), inline: true },
-        { label: 'Usa software livre', value: data['usesFreeSoftware'] === 'sim' ? 'Sim' : 'Não' },
-        { label: 'Distribuição Linux', value: lbl(DISTROS, data['distro']) },
-        { label: 'Situação acadêmica', value: lbl(STUDENT_OPTIONS, data['isStudent']) },
-        { label: 'Instituição', value: String(data['institution'] ?? '') },
+        { label: t('formReview.fields.name'), value: String(data['name'] ?? '') },
+        { label: t('formReview.fields.email'), value: String(data['email'] ?? ''), inline: true },
+        { label: t('formReview.fields.phone'), value: String(data['phone'] ?? ''), inline: true },
+        {
+          label: t('formReview.fields.usesFreeSoftware'),
+          value: data['usesFreeSoftware'] === 'yes' ? t('common.yes') : t('common.no'),
+        },
+        { label: t('formReview.fields.distro'), value: lbl(DISTROS, data['distro']) },
+        {
+          label: t('formReview.fields.academicStatus'),
+          value: lblT(STUDENT_OPTIONS, data['isStudent'], t),
+        },
+        { label: t('formReview.fields.institution'), value: String(data['institution'] ?? '') },
       ],
     },
     {
-      title: 'Disponibilidade',
+      title: t('formCollaborator.availabilityLabel'),
       tagLayout: true,
-      fields: shifts.map((v) => ({ label: lbl(SHIFT_OPTIONS, v), value: '' })),
+      fields: shifts.map((v) => ({ label: lblT(SHIFT_OPTIONS, v, t), value: '' })),
     },
     {
-      title: 'Áreas de colaboração',
+      title: t('formCollaborator.areasLabel'),
       tagLayout: true,
-      fields: areas.map((v) => ({ label: lbl(COLLABORATION_AREAS, v), value: '' })),
+      fields: areas.map((v) => ({ label: lblT(COLLABORATION_AREAS, v, t), value: '' })),
     },
   ];
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// Speaker  →  title "Submissão de palestras"
+// Speaker
 // ══════════════════════════════════════════════════════════════════════════════
-export function buildSpeakerSections(data: Record<string, unknown>): ConfirmationSection[] {
+export function buildSpeakerSections(
+  data: Record<string, unknown>,
+  t: TranslateFn,
+): ConfirmationSection[] {
   const speakers = (data['speakers'] as Array<Record<string, unknown>>) ?? [];
   const talks = (data['talks'] as Array<Record<string, unknown>>) ?? [];
   const sections: ConfirmationSection[] = [];
 
   speakers.forEach((sp, i) => {
     sections.push({
-      title: speakers.length > 1 ? `Palestrante ${i + 1}` : 'Palestrante',
+      title:
+        speakers.length > 1
+          ? t('formReview.sections.speakerN', { n: i + 1 })
+          : t('formReview.sections.speaker'),
       cardLayout: true,
       fields: [
-        { label: 'Foto', value: '', image: sp['photo'] as File | null },
-        { label: 'Nome', value: String(sp['name'] ?? '') },
-        { label: 'E-mail', value: String(sp['email'] ?? ''), inline: true },
-        { label: 'Telefone', value: String(sp['phone'] ?? ''), inline: true },
-        { label: 'Site', value: String(sp['site'] ?? '') },
-        { label: 'Mini currículo', value: String(sp['minicurriculo'] ?? '') },
+        { label: t('formReview.fields.photo'), value: '', image: sp['photo'] as File | null },
+        { label: t('formReview.fields.name'), value: String(sp['name'] ?? '') },
+        { label: t('formReview.fields.email'), value: String(sp['email'] ?? ''), inline: true },
+        { label: t('formReview.fields.phone'), value: String(sp['phone'] ?? ''), inline: true },
+        { label: t('formReview.fields.site'), value: String(sp['site'] ?? '') },
+        { label: t('formReview.fields.minicurriculo'), value: String(sp['minicurriculo'] ?? '') },
       ],
     });
   });
 
   talks.forEach((tk, i) => {
     sections.push({
-      title: talks.length > 1 ? `Atividade ${i + 1}` : 'Atividade',
+      title:
+        talks.length > 1
+          ? t('formReview.sections.talkN', { n: i + 1 })
+          : t('formReview.sections.talk'),
       fields: [
-        { label: 'Título', value: String(tk['titulo'] ?? '') },
-        { label: 'Descrição', value: String(tk['descricao'] ?? '') },
-        { label: 'Turno', value: String(tk['turno'] ?? ''), inline: true },
-        { label: 'Tipo', value: String(tk['tipo'] ?? ''), inline: true },
-        { label: 'Tema', value: String(tk['temaLabel'] ?? tk['tema'] ?? '') },
-        ...(tk['slideUrl'] ? [{ label: 'URL do slide', value: String(tk['slideUrl']) }] : []),
+        {
+          label: t('formReview.fields.talkTitle'),
+          value: String(tk['titulo'] ?? ''),
+          fullWidth: true,
+        },
+        {
+          label: t('formReview.fields.talkDescription'),
+          value: String(tk['descricao'] ?? ''),
+          fullWidth: true,
+        },
+        { label: t('formReview.fields.shift'), value: lblT(TURNOS, tk['turno'], t), inline: true },
+        { label: t('formReview.fields.type'), value: lblT(TIPOS, tk['tipo'], t), inline: true },
+        { label: t('formReview.fields.subject'), value: lblT(TEMAS, tk['tema'], t) },
+        ...(tk['slideUrl']
+          ? [{ label: t('formReview.fields.slideUrl'), value: String(tk['slideUrl']) }]
+          : []),
         ...(tk['slideFile']
-          ? [{ label: 'Arquivo de slide', value: (tk['slideFile'] as File).name }]
+          ? [{ label: t('formReview.fields.slideFile'), value: (tk['slideFile'] as File).name }]
           : []),
       ],
     });

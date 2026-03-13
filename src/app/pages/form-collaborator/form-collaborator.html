@@ -6,21 +6,26 @@
         <button matIconButton (click)="onBack()" class="mr-2">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        Quero colaborar
+        {{ 'formCollaborator.title' | translate }}
       </h1>
-      <p class="text-default text-muted-foreground mb-2 text-justify">Quer ajudar a construir o FLISoL deste ano?</p>
-      <p class="text-default text-muted-foreground mb-2 text-justify">Estamos organizando a equipe de colaboradores para
-        planejar o evento, trocar ideias e dividir as tarefas que fazem tudo acontecer.</p>
-      <p class="text-default text-muted-foreground mb-2 text-justify">Responda ao questionário abaixo para que possamos
-        iniciar a organização e agendar as primeiras reuniões.</p>
-      <p class="text-default text-muted-foreground mb-10 text-justify">Os colaboradores da equipe de organização recebem
-        certificado de participação na organização do evento.</p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">
+        {{ 'formCollaborator.description1' | translate }}
+      </p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">
+        {{ 'formCollaborator.description2' | translate }}
+      </p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">
+        {{ 'formCollaborator.description3' | translate }}
+      </p>
+      <p class="text-default text-muted-foreground mb-10 text-justify">
+        {{ 'formCollaborator.description4' | translate }}
+      </p>
 
       <form class="collaborator-form" [formGroup]="form" (ngSubmit)="onSubmit($event)" novalidate>
 
         <!-- Nome -->
         <mat-form-field class="collaborator-field">
-          <mat-label>Nome</mat-label>
+          <mat-label>{{ 'formCollaborator.name' | translate }}</mat-label>
           <input matInput formControlName="name" autocomplete="name" />
           @if (hasError('name')) {
             <mat-error>{{ getError('name') }}</mat-error>
@@ -29,7 +34,7 @@
 
         <!-- E-mail -->
         <mat-form-field class="collaborator-field">
-          <mat-label>E-mail</mat-label>
+          <mat-label>{{ 'formCollaborator.email' | translate }}</mat-label>
           <input matInput type="email" formControlName="email" autocomplete="email" />
           @if (hasError('email')) {
             <mat-error>{{ getError('email') }}</mat-error>
@@ -38,7 +43,7 @@
 
         <!-- Telefone -->
         <mat-form-field class="collaborator-field">
-          <mat-label>Telefone</mat-label>
+          <mat-label>{{ 'formCollaborator.phone' | translate }}</mat-label>
           <input
             matInput
             formControlName="phone"
@@ -55,16 +60,16 @@
         <!-- Usa Software Livre? -->
         <div class="radio-field">
           <label class="radio-label text-default">
-            Usa Software Livre?
+            {{ 'formCollaborator.usesFreeSoftware' | translate }}
             <span class="radio-required" aria-hidden="true">*</span>
           </label>
           <mat-radio-group
             formControlName="usesFreeSoftware"
             class="radio-group"
-            aria-label="Usa Software Livre?"
+            [attr.aria-label]="'formCollaborator.usesFreeSoftware' | translate"
           >
-            <mat-radio-button value="yes">Sim</mat-radio-button>
-            <mat-radio-button value="no">Não</mat-radio-button>
+            <mat-radio-button value="yes">{{ 'common.yes' | translate }}</mat-radio-button>
+            <mat-radio-button value="no">{{ 'common.no' | translate }}</mat-radio-button>
           </mat-radio-group>
           @if (hasError('usesFreeSoftware')) {
             <mat-error class="radio-error">{{ getError('usesFreeSoftware') }}</mat-error>
@@ -73,11 +78,11 @@
 
         <!-- Qual distribuição GNU/Linux você usa? -->
         <mat-form-field class="collaborator-field">
-          <mat-label>Qual distribuição GNU/Linux você usa?</mat-label>
+          <mat-label>{{ 'formCollaborator.distroLabel' | translate }}</mat-label>
           <input
             matInput
             formControlName="distro"
-            placeholder="Buscar distribuição..."
+            [placeholder]="'formCollaborator.distroSearch' | translate"
             [matAutocomplete]="distroAuto"
             autocomplete="off"
           />
@@ -95,18 +100,18 @@
 
         <!-- Você é estudante? -->
         <mat-form-field class="collaborator-field">
-          <mat-label>Você é estudante?</mat-label>
+          <mat-label>{{ 'formCollaborator.isStudentLabel' | translate }}</mat-label>
           <input
             matInput
             formControlName="isStudent"
-            placeholder="Selecione sua situação..."
+            [placeholder]="'formCollaborator.isStudentSelect' | translate"
             [matAutocomplete]="studentAuto"
             autocomplete="off"
           />
           <mat-autocomplete #studentAuto="matAutocomplete" [displayWith]="displayLabel(studentOptions)">
             @for (option of studentOptions; track option.value) {
               <mat-option [value]="option.value" (onSelectionChange)="selectOption('isStudent', option)">
-                {{ option.label }}
+                {{ option.label | translate }}
               </mat-option>
             }
           </mat-autocomplete>
@@ -117,7 +122,7 @@
 
         <!-- Onde você estuda ou trabalha? -->
         <mat-form-field class="collaborator-field">
-          <mat-label>Onde você estuda ou trabalha?</mat-label>
+          <mat-label>{{ 'formCollaborator.institution' | translate }}</mat-label>
           <input matInput formControlName="institution" autocomplete="organization" />
           @if (hasError('institution')) {
             <mat-error>{{ getError('institution') }}</mat-error>
@@ -127,7 +132,7 @@
         <!-- Disponibilidade -->
         <div class="checkbox-field">
           <label class="checkbox-label text-default">
-            Disponibilidade
+            {{ 'formCollaborator.availabilityLabel' | translate }}
             <span class="checkbox-required" aria-hidden="true">*</span>
           </label>
           <div class="checkbox-group">
@@ -136,19 +141,21 @@
                 [checked]="isShiftSelected(option.value)"
                 (change)="toggleShift(option.value)"
               >
-                {{ option.label }}
+                {{ option.label | translate }}
               </mat-checkbox>
             }
           </div>
           @if (submittedSig() && selectedShifts.length === 0) {
-            <mat-error class="checkbox-error">Selecione ao menos uma disponibilidade.</mat-error>
+            <mat-error class="checkbox-error">
+              {{ 'formCollaborator.availabilityError' | translate }}
+            </mat-error>
           }
         </div>
 
         <!-- Onde deseja colaborar? -->
         <div class="checkbox-field">
           <label class="checkbox-label text-default">
-            Onde deseja colaborar?
+            {{ 'formCollaborator.areasLabel' | translate }}
             <span class="checkbox-required" aria-hidden="true">*</span>
           </label>
           <div class="checkbox-group">
@@ -157,12 +164,14 @@
                 [checked]="isAreaSelected(option.value)"
                 (change)="toggleArea(option.value)"
               >
-                {{ option.label }}
+                {{ option.label | translate }}
               </mat-checkbox>
             }
           </div>
           @if (submittedSig() && selectedAreas.length === 0) {
-            <mat-error class="checkbox-error">Selecione ao menos uma área de colaboração.</mat-error>
+            <mat-error class="checkbox-error">
+              {{ 'formCollaborator.areasError' | translate }}
+            </mat-error>
           }
         </div>
 
@@ -170,10 +179,10 @@
         <div class="form-actions">
           <button mat-button type="button" (click)="onBack()">
             <mat-icon>arrow_back</mat-icon>
-            Voltar
+            {{ 'common.back' | translate }}
           </button>
           <button mat-flat-button color="primary" type="submit">
-            Revisar dados
+            {{ 'common.reviewData' | translate }}
           </button>
         </div>
 

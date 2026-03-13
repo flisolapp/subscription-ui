@@ -5,6 +5,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PageStructure } from '../../components/page-structure/page-structure';
 import {
   SubscriptionError,
@@ -16,6 +17,7 @@ import {
   buildCollaboratorSections,
   buildParticipantSections,
   buildSpeakerSections,
+  TranslateFn,
 } from './review-sections.builder';
 
 // ── Public interfaces (consumed by builder) ───────────────────────────────────
@@ -25,6 +27,7 @@ export interface ConfirmationField {
   value: string;
   image?: File | null;
   inline?: boolean;
+  fullWidth?: boolean;
 }
 
 export interface ConfirmationSection {
@@ -46,10 +49,13 @@ export interface FieldRow {
 
 type FormType = 'participant' | 'speaker' | 'collaborator';
 
-const FORM_CONFIG: Record<FormType, { title: string; backRoute: string }> = {
-  participant: { title: 'Inscreva-se', backRoute: '/subscribe/participant' },
-  speaker: { title: 'Submissão de palestras', backRoute: '/subscribe/speaker' },
-  collaborator: { title: 'Quero colaborar', backRoute: '/subscribe/collaborator' },
+const FORM_CONFIG: Record<FormType, { titleKey: string; backRoute: string }> = {
+  participant: { titleKey: 'formReview.titles.participant', backRoute: '/subscribe/participant' },
+  speaker: { titleKey: 'formReview.titles.speaker', backRoute: '/subscribe/speaker' },
+  collaborator: {
+    titleKey: 'formReview.titles.collaborator',
+    backRoute: '/subscribe/collaborator',
+  },
 };
 
 // ── Snackbar helpers ──────────────────────────────────────────────────────────
@@ -60,7 +66,7 @@ const SNACK_DURATION = 5_000;
 
 @Component({
   selector: 'app-form-review',
-  imports: [CommonModule, PageStructure, MatButton, MatIcon, MatProgressBar],
+  imports: [CommonModule, TranslatePipe, PageStructure, MatButton, MatIcon, MatProgressBar],
   templateUrl: './form-review.html',
   styleUrl: './form-review.scss',
 })
@@ -76,7 +82,7 @@ export class FormReview implements OnInit {
    */
   readonly uploadPercent = signal<number | null>(null);
 
-  readonly title = computed(() => FORM_CONFIG[this.formType()].title);
+  readonly titleKey = computed(() => FORM_CONFIG[this.formType()].titleKey);
   readonly backRoute = computed(() => FORM_CONFIG[this.formType()].backRoute);
 
   constructor(
@@ -85,6 +91,7 @@ export class FormReview implements OnInit {
     private readonly subscriptionService: SubscriptionService,
     private readonly snackBar: MatSnackBar,
     private readonly formStorage: FormStorageService,
+    private readonly translate: TranslateService,
   ) {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -118,7 +125,6 @@ export class FormReview implements OnInit {
   }
 
   fieldRows(fields: ConfirmationField[]): FieldRow[] {
-    const FULL_WIDTH = new Set(['título', 'descrição']);
     const rows: FieldRow[] = [];
     let i = 0;
 
@@ -133,7 +139,7 @@ export class FormReview implements OnInit {
         rows.push({
           type: 'single',
           field: curr,
-          fullWidth: FULL_WIDTH.has(curr.label.toLowerCase()),
+          fullWidth: !!curr.fullWidth,
         });
         i++;
       }
@@ -148,16 +154,7 @@ export class FormReview implements OnInit {
     this.router.navigate([this.backRoute()]);
   }
 
-  // ── 1. onConfirm — production path ────────────────────────────────────────
-  /**
-   * Uses submitWithProgress() so the progress bar shows real upload %.
-   * Falls back to indeterminate while the server processes the request
-   * (uploadPercent = null after bytes are sent but before the response).
-   *
-   * On success → clears all form storage and returns to /subscribe.
-   * On error   → shows a snackbar and stays on the review page so the
-   *              user can go back to fix the form or retry.
-   */
+  // ── 1. onConfirm - production path ────────────────────────────────────────
   onConfirm(): void {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
@@ -167,7 +164,6 @@ export class FormReview implements OnInit {
 
     this.subscriptionService.submitWithProgress(this.formType(), payload).subscribe({
       next: ({ percent, done, response }) => {
-        // Drive the progress bar with real upload bytes
         this.uploadPercent.set(percent);
 
         if (done) {
@@ -182,7 +178,6 @@ export class FormReview implements OnInit {
         this.loading.set(false);
         this.uploadPercent.set(null);
         this.handleSubmitError(err);
-        // ← no navigation: user stays on the review page to retry or go back
       },
       complete: () => {
         this.loading.set(false);
@@ -191,14 +186,7 @@ export class FormReview implements OnInit {
     });
   }
 
-  // ── 2. onConfirmSimple — fallback / lower-overhead path ───────────────────
-  /**
-   * Uses the plain submit() (JSON or multipart, no progress events).
-   * Handy if you need to bypass FormData serialisation for a specific flow.
-   * Wire to a secondary button or swap with onConfirm() as needed.
-   *
-   * Same success/error contract as onConfirm().
-   */
+  // ── 2. onConfirmSimple - fallback / lower-overhead path ───────────────────
   async onConfirmSimple(): Promise<void> {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
@@ -209,33 +197,24 @@ export class FormReview implements OnInit {
     try {
       const res = await this.subscriptionService.submit(this.formType(), payload);
       this.clearFormStorage();
-      this.snackBar.open(res.message ?? 'Enviado com sucesso!', 'OK', {
-        duration: SNACK_DURATION,
-      });
-      // v1: this.router.navigate(['/subscribe/success'], { state: { type: this.formType() }, replaceUrl: true });
+      this.snackBar.open(
+        res.message ?? this.translate.instant('common.sentSuccess'),
+        this.translate.instant('common.ok'),
+        { duration: SNACK_DURATION },
+      );
       this.router.navigate(['/subscribe/success'], {
         state: { type: this.formType() },
         replaceUrl: true,
       });
     } catch (err: unknown) {
       this.handleSubmitError(err);
-      // ← no navigation on error
     } finally {
       this.loading.set(false);
       this.uploadPercent.set(null);
     }
   }
 
-  // ── 3. onConfirmDry — dev/debug path ──────────────────────────────────────
-  /**
-   * Calls submitDry(): logs the full serialised body to the console,
-   * simulates a delay, and shows a snackbar — NO network request.
-   *
-   * Intentionally does NOT clear storage or navigate so you can re-run
-   * the dry-run multiple times without losing the review state.
-   *
-   * Remove before going to production.
-   */
+  // ── 3. onConfirmDry - dev/debug path ──────────────────────────────────────
   async onConfirmDry(): Promise<void> {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
@@ -244,9 +223,8 @@ export class FormReview implements OnInit {
     this.uploadPercent.set(null);
 
     try {
-      const res = await this.subscriptionService.submitDry(this.formType(), payload);
-      // Dry run: no clearFormStorage(), no navigate — stay on page for re-runs
-      // this.snackBar.open(`🧪 ${res.message}`, 'OK', { duration: SNACK_DURATION });
+      await this.subscriptionService.submitDry(this.formType(), payload);
+      // Dry run: no clearFormStorage(), no navigate - stay on page for re-runs
       this.router.navigate(['/subscribe/success'], {
         state: { type: this.formType() },
         replaceUrl: true,
@@ -261,35 +239,13 @@ export class FormReview implements OnInit {
 
   // ── Private ───────────────────────────────────────────────────────────────
 
-  /**
-   * Wipes every form-related storage entry so the next visit to /subscribe
-   * starts with a completely fresh flow.
-   *
-   * Uncomment the line below once you are ready to plug in the real service.
-   * FormStorageService.clearAll() handles:
-   *   • localStorage keys: flisol_form_participant, flisol_form_speakers,
-   *     flisol_form_talks, flisol_form_collaborator,
-   *     flisol_form_collaborator_disp, flisol_form_collaborator_grupos
-   *   • IndexedDB files under the prefix:  flisol_speaker_*
-   *
-   * The router navigation state that carries the payload is discarded
-   * automatically by replaceUrl: true on the navigate() call.
-   */
   private clearFormStorage(): void {
     // this.formStorage.clearAll();
     console.debug(
-      '[FormReview] clearFormStorage() called — uncomment this.formStorage.clearAll() when ready',
+      '[FormReview] clearFormStorage() called - uncomment this.formStorage.clearAll() when ready',
     );
   }
 
-  /**
-   * Centralised error handler for all three submit paths.
-   * Always stays on the current page — the user decides what to do next.
-   *
-   * 422 → joins the first error of each invalid field into one message
-   * Other HTTP errors → shows server message + status label
-   * Unknown → generic Portuguese fallback
-   */
   private handleSubmitError(err: unknown): void {
     if (err instanceof SubscriptionValidationError) {
       const summary = err.invalidFields
@@ -297,32 +253,43 @@ export class FormReview implements OnInit {
         .filter(Boolean)
         .join(' · ');
 
-      this.snackBar.open(summary || err.message, 'OK', { duration: SNACK_DURATION });
+      this.snackBar.open(summary || err.message, this.translate.instant('common.ok'), {
+        duration: SNACK_DURATION,
+      });
       console.warn('[FormReview] Validation errors:', err.errors);
       return;
     }
 
     if (err instanceof SubscriptionError) {
-      const label = err.status === 0 ? 'Sem conexão' : `Erro ${err.status}`;
-      this.snackBar.open(`${label}: ${err.message}`, 'Fechar', { duration: SNACK_DURATION });
+      const label =
+        err.status === 0
+          ? this.translate.instant('common.noConnection')
+          : this.translate.instant('common.httpError', { status: err.status });
+
+      this.snackBar.open(`${label}: ${err.message}`, this.translate.instant('common.close'), {
+        duration: SNACK_DURATION,
+      });
       console.error('[FormReview] HTTP error:', err);
       return;
     }
 
-    this.snackBar.open('Ocorreu um erro inesperado. Tente novamente.', 'Fechar', {
-      duration: SNACK_DURATION,
-    });
+    this.snackBar.open(
+      this.translate.instant('common.unexpectedError'),
+      this.translate.instant('common.close'),
+      { duration: SNACK_DURATION },
+    );
     console.error('[FormReview] Unexpected error:', err);
   }
 
   private buildSections(type: FormType, payload: Record<string, unknown>): ConfirmationSection[] {
+    const t: TranslateFn = (key, params) => this.translate.instant(key, params);
     switch (type) {
       case 'participant':
-        return buildParticipantSections(payload);
+        return buildParticipantSections(payload, t);
       case 'collaborator':
-        return buildCollaboratorSections(payload);
+        return buildCollaboratorSections(payload, t);
       case 'speaker':
-        return buildSpeakerSections(payload);
+        return buildSpeakerSections(payload, t);
     }
   }
 }

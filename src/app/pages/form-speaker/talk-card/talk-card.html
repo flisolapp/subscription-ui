@@ -2,13 +2,15 @@
 
   @if (total() > 1) {
     <div class="card-header">
-      <span class="card-title text-default">Atividade {{ idx() + 1 }}</span>
+      <span class="card-title text-default">
+        {{ 'formSpeaker.talkCard.title' | translate: { n: idx() + 1 } }}
+      </span>
       <button
         mat-icon-button
         type="button"
         class="card-remove-btn"
         (click)="remove.emit()"
-        aria-label="Remover atividade"
+        [attr.aria-label]="'formSpeaker.talkCard.removeAriaLabel' | translate"
       >
         <mat-icon>delete</mat-icon>
       </button>
@@ -17,7 +19,7 @@
 
   <!-- Título -->
   <mat-form-field class="talk-field">
-    <mat-label>Título da Palestra/Oficina</mat-label>
+    <mat-label>{{ 'formSpeaker.talkCard.titleLabel' | translate }}</mat-label>
     <input matInput formControlName="titulo" />
     @if (hasError('titulo')) {
       <mat-error>{{ getError('titulo') }}</mat-error>
@@ -26,7 +28,7 @@
 
   <!-- Descrição -->
   <mat-form-field class="talk-field">
-    <mat-label>Descrição</mat-label>
+    <mat-label>{{ 'formSpeaker.talkCard.description' | translate }}</mat-label>
     <textarea matInput formControlName="descricao" rows="4"></textarea>
     @if (hasError('descricao')) {
       <mat-error>{{ getError('descricao') }}</mat-error>
@@ -36,16 +38,16 @@
   <!-- Preferência de turno -->
   <div class="radio-field">
     <label class="radio-label text-default">
-      Preferência de turno
+      {{ 'formSpeaker.talkCard.shiftLabel' | translate }}
       <span class="radio-required" aria-hidden="true">*</span>
     </label>
     <mat-radio-group
       formControlName="turno"
       class="radio-group"
-      aria-label="Preferência de turno"
+      [attr.aria-label]="'formSpeaker.talkCard.shiftLabel' | translate"
     >
       @for (option of turnos; track option.value) {
-        <mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
+        <mat-radio-button [value]="option.value">{{ option.label | translate }}</mat-radio-button>
       }
     </mat-radio-group>
     @if (hasError('turno')) {
@@ -56,16 +58,16 @@
   <!-- Tipo de atividade -->
   <div class="radio-field">
     <label class="radio-label text-default">
-      Tipo de atividade
+      {{ 'formSpeaker.talkCard.typeLabel' | translate }}
       <span class="radio-required" aria-hidden="true">*</span>
     </label>
     <mat-radio-group
       formControlName="tipo"
       class="radio-group"
-      aria-label="Tipo de atividade"
+      [attr.aria-label]="'formSpeaker.talkCard.typeLabel' | translate"
     >
       @for (option of tipos; track option.value) {
-        <mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
+        <mat-radio-button [value]="option.value">{{ option.label | translate }}</mat-radio-button>
       }
     </mat-radio-group>
     @if (hasError('tipo')) {
@@ -73,20 +75,20 @@
     }
   </div>
 
-  <!-- Assunto (Tema) — autocomplete -->
+  <!-- Assunto (Tema) - autocomplete -->
   <mat-form-field class="talk-field">
-    <mat-label>Assunto (Tema)</mat-label>
+    <mat-label>{{ 'formSpeaker.talkCard.subjectLabel' | translate }}</mat-label>
     <input
       matInput
       formControlName="tema"
-      placeholder="Buscar tema..."
+      [placeholder]="'formSpeaker.talkCard.subjectSearch' | translate"
       [matAutocomplete]="temaAuto"
       autocomplete="off"
     />
     <mat-autocomplete #temaAuto="matAutocomplete" [displayWith]="displayTema">
       @for (option of filteredTemas$ | async; track option.value) {
         <mat-option [value]="option.value" (onSelectionChange)="selectTema(option)">
-          {{ option.label }}
+          {{ option.label | translate }}
         </mat-option>
       }
     </mat-autocomplete>
@@ -98,7 +100,8 @@
   <!-- Slide (file upload) -->
   <div class="slide-upload-field">
     <label class="slide-upload-label text-default">
-      Slide <span class="slide-formats">(PDF, ODP ou PPT/X)</span>
+      {{ 'formSpeaker.talkCard.slideLabel' | translate }}
+      <span class="slide-formats">{{ 'formSpeaker.talkCard.slideFormats' | translate }}</span>
     </label>
     <div
       class="slide-upload-area"
@@ -106,11 +109,11 @@
       role="button"
       tabindex="0"
       (keydown.enter)="slideFileInput.click()"
-      aria-label="Enviar arquivo de slide"
+      [attr.aria-label]="'formSpeaker.talkCard.slideAriaLabel' | translate"
     >
       <mat-icon class="slide-upload-icon">upload</mat-icon>
       <span class="slide-upload-name" [class.slide-upload-name--filled]="!!slideFile()">
-        {{ slideFile() ? slideFile()!.name : 'Escolher arquivo' }}
+        {{ slideFile() ? slideFile()!.name : ('formSpeaker.talkCard.slideChoose' | translate) }}
       </span>
       <input
         #slideFileInput
@@ -126,7 +129,7 @@
             type="button"
             class="slide-action-btn slide-action-btn--primary"
             (click)="downloadSlide()"
-            title="Baixar slide"
+            [title]="'formSpeaker.talkCard.slideDownload' | translate"
           >
             <mat-icon>download</mat-icon>
           </button>
@@ -135,7 +138,7 @@
             type="button"
             class="slide-action-btn slide-action-btn--warn"
             (click)="onSlideRemove($event)"
-            title="Remover slide"
+            [title]="'formSpeaker.talkCard.slideRemove' | translate"
           >
             <mat-icon>close</mat-icon>
           </button>
@@ -146,8 +149,12 @@
 
   <!-- Endereço do Slide (URL) -->
   <mat-form-field class="talk-field">
-    <mat-label>Endereço do Slide</mat-label>
-    <input matInput formControlName="slideUrl" placeholder="URL do slide (opcional)" />
+    <mat-label>{{ 'formSpeaker.talkCard.slideUrl' | translate }}</mat-label>
+    <input
+      matInput
+      formControlName="slideUrl"
+      [placeholder]="'formSpeaker.talkCard.slideUrlPlaceholder' | translate"
+    />
   </mat-form-field>
 
 </div>

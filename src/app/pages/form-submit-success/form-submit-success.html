@@ -9,15 +9,15 @@
 
       <!-- ── Copy ───────────────────────────────────────────────────────────── -->
       <p class="text-default text-primary font-semibold tracking-widest uppercase text-sm mb-3">
-        Tudo certo!
+        {{ 'formSuccess.allGood' | translate }}
       </p>
 
       <h1 class="text-default text-4xl font-black mb-4">
-        {{ title() }}
+        {{ titleKey() | translate }}
       </h1>
 
       <p class="text-default text-on-surface-variant text-base mb-10 max-w-md">
-        A sua inscrição foi realizada com sucesso. Até breve!
+        {{ 'formSuccess.description' | translate }}
       </p>
 
       <!-- ── Action ─────────────────────────────────────────────────────────── -->
@@ -28,7 +28,7 @@
         (click)="onNewSubscription()"
       >
         <mat-icon>add</mat-icon>
-        Realizar nova inscrição
+        {{ 'formSuccess.newSubscription' | translate }}
       </button>
 
     </div>

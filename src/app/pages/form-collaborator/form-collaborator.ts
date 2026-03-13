@@ -16,6 +16,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { debounceTime, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PageStructure } from '../../components/page-structure/page-structure';
 import { DISTROS, SelectOption, STUDENT_OPTIONS } from '../form-participant/form-participant';
 import { FormStorageService } from '../../services/form-storage/form-storage-service';
@@ -32,43 +33,29 @@ function phoneValidator(control: AbstractControl): ValidationErrors | null {
   return raw.length >= 10 && raw.length <= 11 ? null : { phoneInvalid: true };
 }
 
-// ── Static data ───────────────────────────────────────────────────────────────
+// ── Static data - labels are translation keys ─────────────────────────────────
 export const SHIFT_OPTIONS: SelectOption[] = [
-  { value: '1', label: 'Manhã - Todos os dias' },
-  { value: '2', label: 'Tarde - Todos os dias' },
-  { value: '3', label: 'Noite - Todos os dias' },
-  { value: '4', label: 'Sábado pela manhã' },
-  { value: '5', label: 'Sábado pela tarde' },
+  { value: '1', label: 'formCollaborator.shifts.morningAll' },
+  { value: '2', label: 'formCollaborator.shifts.afternoonAll' },
+  { value: '3', label: 'formCollaborator.shifts.eveningAll' },
+  { value: '4', label: 'formCollaborator.shifts.saturdayMorning' },
+  { value: '5', label: 'formCollaborator.shifts.saturdayAfternoon' },
 ];
 
 export const COLLABORATION_AREAS: SelectOption[] = [
-  { value: '1', label: 'Grupo 1 – Na busca por patrocínio e apoio' },
-  { value: '2', label: 'Grupo 2 – Na publicidade e divulgação (redes sociais)' },
-  { value: '3', label: 'Grupo 3 – Na organização do blog' },
-  {
-    value: '4',
-    label:
-      'Grupo 4 – No controle de inscrição (participantes e palestrantes), certificados e controle das atividades',
-  },
-  {
-    value: '5',
-    label:
-      'Grupo 5 – Na infra-estrutura tecnológica (rede local e wifi, servidores e repositórios)',
-  },
-  {
-    value: '6',
-    label: 'Grupo 6 – Na oficina de instalação (InstallFest) e gravação de imagens em mídias',
-  },
-  { value: '7', label: 'Grupo 7 – Temário (Outras palestras, Oficinas e Mini-cursos)' },
-  { value: '8', label: 'Grupo 8 – Sistema de inscrição' },
-  { value: '9', label: 'Grupo 9 – Organização de salas' },
-  { value: '10', label: 'Grupo 10 – Visita e divulgação em outras IES e escolas' },
-  { value: '11', label: 'Grupo 11 – Filmagem, fotografia e documentário do evento' },
-  { value: '12', label: 'Grupo 12 – Arte Gráfica e material gráfico' },
-  {
-    value: '13',
-    label: 'Grupo 13 – Comunicação colaborativa (divulgação em tempo real nas redes sociais)',
-  },
+  { value: '1', label: 'formCollaborator.areas.group1' },
+  { value: '2', label: 'formCollaborator.areas.group2' },
+  { value: '3', label: 'formCollaborator.areas.group3' },
+  { value: '4', label: 'formCollaborator.areas.group4' },
+  { value: '5', label: 'formCollaborator.areas.group5' },
+  { value: '6', label: 'formCollaborator.areas.group6' },
+  { value: '7', label: 'formCollaborator.areas.group7' },
+  { value: '8', label: 'formCollaborator.areas.group8' },
+  { value: '9', label: 'formCollaborator.areas.group9' },
+  { value: '10', label: 'formCollaborator.areas.group10' },
+  { value: '11', label: 'formCollaborator.areas.group11' },
+  { value: '12', label: 'formCollaborator.areas.group12' },
+  { value: '13', label: 'formCollaborator.areas.group13' },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -78,6 +65,7 @@ export const COLLABORATION_AREAS: SelectOption[] = [
     CommonModule,
     AsyncPipe,
     ReactiveFormsModule,
+    TranslatePipe,
     PageStructure,
     MatFormField,
     MatLabel,
@@ -118,6 +106,7 @@ export class FormCollaborator implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly router: Router,
     private readonly storage: FormStorageService,
+    private readonly translate: TranslateService,
   ) {}
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -184,7 +173,11 @@ export class FormCollaborator implements OnInit, OnDestroy {
 
   // ── Autocomplete helpers ───────────────────────────────────────────────────
   public displayLabel(options: SelectOption[]): (value: string) => string {
-    return (value: string) => options.find((o) => o.value === value)?.label ?? value ?? '';
+    return (value: string) => {
+      const found = options.find((o) => o.value === value);
+      if (!found) return value ?? '';
+      return this.translate.instant(found.label);
+    };
   }
 
   public selectOption(controlName: string, option: SelectOption): void {
@@ -196,11 +189,13 @@ export class FormCollaborator implements OnInit, OnDestroy {
     const ctrl = this.form.get(controlName);
     if (!ctrl) return null;
     if (!this.submittedSig() && !ctrl.touched) return null;
-    if (ctrl.hasError('required')) return 'Este campo é obrigatório.';
+    if (ctrl.hasError('required')) return this.translate.instant('common.required');
     if (ctrl.hasError('minlength'))
-      return `Mínimo de ${ctrl.errors!['minlength'].requiredLength} caracteres.`;
-    if (ctrl.hasError('email')) return 'Informe um e-mail válido.';
-    if (ctrl.hasError('phoneInvalid')) return 'Número de telefone inválido.';
+      return this.translate.instant('common.minLength', {
+        min: ctrl.errors!['minlength'].requiredLength,
+      });
+    if (ctrl.hasError('email')) return this.translate.instant('common.invalidEmail');
+    if (ctrl.hasError('phoneInvalid')) return this.translate.instant('common.invalidPhone');
     return null;
   }
 

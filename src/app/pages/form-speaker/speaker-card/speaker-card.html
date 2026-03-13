@@ -2,13 +2,15 @@
 
   @if (total() > 1) {
     <div class="card-header">
-      <span class="card-title text-default">Palestrante {{ idx() + 1 }}</span>
+      <span class="card-title text-default">
+        {{ 'formSpeaker.speakerCard.title' | translate: { n: idx() + 1 } }}
+      </span>
       <button
         mat-icon-button
         type="button"
         class="card-remove-btn"
         (click)="remove.emit()"
-        aria-label="Remover palestrante"
+        [attr.aria-label]="'formSpeaker.speakerCard.removeAriaLabel' | translate"
       >
         <mat-icon>delete</mat-icon>
       </button>
@@ -27,10 +29,14 @@
         role="button"
         tabindex="0"
         (keydown.enter)="photoFileInput.click()"
-        aria-label="Enviar foto do palestrante"
+        [attr.aria-label]="'formSpeaker.speakerCard.photoAriaLabel' | translate"
       >
         @if (photoPreviewUrl()) {
-          <img [src]="photoPreviewUrl()!" alt="Foto do palestrante" class="photo-preview" />
+          <img
+            [src]="photoPreviewUrl()!"
+            [alt]="'formSpeaker.speakerCard.photoAriaLabel' | translate"
+            class="photo-preview"
+          />
           <div class="photo-overlay">
             <mat-icon>photo_camera</mat-icon>
           </div>
@@ -38,7 +44,8 @@
           <div class="photo-placeholder" [class.photo-placeholder--error]="hasPhotoError">
             <mat-icon>photo_camera</mat-icon>
             <span class="photo-hint-text">
-              Enviar foto <span class="required" aria-hidden="true">*</span>
+              {{ 'formSpeaker.speakerCard.photoHint' | translate }}
+              <span class="required" aria-hidden="true">*</span>
             </span>
           </div>
         }
@@ -59,7 +66,7 @@
             type="button"
             class="photo-action-btn photo-action-btn--primary"
             (click)="downloadPhoto()"
-            title="Baixar foto"
+            [title]="'formSpeaker.speakerCard.photoDownload' | translate"
           >
             <mat-icon>download</mat-icon>
           </button>
@@ -68,7 +75,7 @@
             type="button"
             class="photo-action-btn photo-action-btn--warn"
             (click)="onPhotoRemove($event)"
-            title="Remover foto"
+            [title]="'formSpeaker.speakerCard.photoRemove' | translate"
           >
             <mat-icon>close</mat-icon>
           </button>
@@ -76,9 +83,13 @@
       }
 
       @if (hasPhotoError) {
-        <mat-error class="photo-error">Envie uma foto.</mat-error>
+        <mat-error class="photo-error">
+          {{ 'formSpeaker.speakerCard.photoError' | translate }}
+        </mat-error>
       } @else if (!photo()) {
-        <span class="photo-hint-sub">PNG ou JPG</span>
+        <span class="photo-hint-sub">
+          {{ 'formSpeaker.speakerCard.photoFormat' | translate }}
+        </span>
       }
 
     </div>
@@ -87,7 +98,7 @@
     <div class="fields-column">
 
       <mat-form-field class="speaker-field">
-        <mat-label>Nome</mat-label>
+        <mat-label>{{ 'formSpeaker.speakerCard.name' | translate }}</mat-label>
         <input matInput formControlName="name" autocomplete="name" />
         @if (hasError('name')) {
           <mat-error>{{ getError('name') }}</mat-error>
@@ -95,7 +106,7 @@
       </mat-form-field>
 
       <mat-form-field class="speaker-field">
-        <mat-label>E-mail</mat-label>
+        <mat-label>{{ 'formSpeaker.speakerCard.email' | translate }}</mat-label>
         <input matInput type="email" formControlName="email" autocomplete="email" />
         @if (hasError('email')) {
           <mat-error>{{ getError('email') }}</mat-error>
@@ -103,7 +114,7 @@
       </mat-form-field>
 
       <mat-form-field class="speaker-field">
-        <mat-label>Telefone</mat-label>
+        <mat-label>{{ 'formSpeaker.speakerCard.phone' | translate }}</mat-label>
         <input
           matInput
           formControlName="phone"
@@ -118,19 +129,15 @@
       </mat-form-field>
 
       <mat-form-field class="speaker-field">
-        <mat-label>Minicurrículo</mat-label>
-        <textarea
-          matInput
-          formControlName="minicurriculo"
-          rows="3"
-        ></textarea>
+        <mat-label>{{ 'formSpeaker.speakerCard.minicurriculo' | translate }}</mat-label>
+        <textarea matInput formControlName="minicurriculo" rows="3"></textarea>
         @if (hasError('minicurriculo')) {
           <mat-error>{{ getError('minicurriculo') }}</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field class="speaker-field">
-        <mat-label>Site (ou endereço do Currículo Lattes)</mat-label>
+        <mat-label>{{ 'formSpeaker.speakerCard.site' | translate }}</mat-label>
         <input matInput formControlName="site" autocomplete="url" />
       </mat-form-field>
 

@@ -1,6 +1,7 @@
 import { Component, input, signal } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface NavItem {
   label: string;
@@ -10,7 +11,7 @@ export interface NavItem {
 
 @Component({
   selector: 'app-speaker-form-nav',
-  imports: [CommonModule, MatIcon],
+  imports: [CommonModule, TranslatePipe, MatIcon],
   templateUrl: './speaker-form-nav.html',
   styleUrl: './speaker-form-nav.scss',
 })

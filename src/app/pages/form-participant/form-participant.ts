@@ -15,6 +15,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { debounceTime, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PageStructure } from '../../components/page-structure/page-structure';
 import { FormStorageService } from '../../services/form-storage/form-storage-service';
 
@@ -71,15 +72,16 @@ export const DISTROS: SelectOption[] = [
   { value: '17', label: 'Outro' },
 ];
 
+// Labels are translation keys - resolved at render time via TranslateService / translate pipe
 export const STUDENT_OPTIONS: SelectOption[] = [
-  { value: '1', label: 'Sim, no ensino médio' },
-  { value: '2', label: 'Sim, no ensino médio técnico' },
-  { value: '3', label: 'Sim, no ensino superior' },
-  { value: '4', label: 'Não, já terminei o ensino superior' },
-  { value: '5', label: 'Não, estou apenas trabalhando' },
-  { value: '6', label: 'Não estou estudando, nem trabalhando' },
-  { value: '7', label: 'Não, sou professor' },
-  { value: '8', label: 'Outro' },
+  { value: '1', label: 'options.student.highSchool' },
+  { value: '2', label: 'options.student.techHighSchool' },
+  { value: '3', label: 'options.student.university' },
+  { value: '4', label: 'options.student.graduated' },
+  { value: '5', label: 'options.student.working' },
+  { value: '6', label: 'options.student.neither' },
+  { value: '7', label: 'options.student.teacher' },
+  { value: '8', label: 'options.student.other' },
 ];
 
 export const STATES_BR: SelectOption[] = [
@@ -119,6 +121,7 @@ export const STATES_BR: SelectOption[] = [
     CommonModule,
     AsyncPipe,
     ReactiveFormsModule,
+    TranslatePipe,
     PageStructure,
     MatFormField,
     MatLabel,
@@ -156,6 +159,7 @@ export class FormParticipant implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly router: Router,
     private readonly storage: FormStorageService,
+    private readonly translate: TranslateService,
   ) {}
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -217,7 +221,12 @@ export class FormParticipant implements OnInit, OnDestroy {
 
   // ── Autocomplete helpers ───────────────────────────────────────────────────
   public displayLabel(options: SelectOption[]): (value: string) => string {
-    return (value: string) => options.find((o) => o.value === value)?.label ?? value ?? '';
+    return (value: string) => {
+      const found = options.find((o) => o.value === value);
+      if (!found) return value ?? '';
+      // translate.instant falls back to the key itself for non-key labels (e.g. distro names)
+      return this.translate.instant(found.label);
+    };
   }
 
   public selectOption(controlName: string, option: SelectOption): void {
@@ -229,12 +238,14 @@ export class FormParticipant implements OnInit, OnDestroy {
     const ctrl = this.form.get(controlName);
     if (!ctrl) return null;
     if (!this.submitted() && !ctrl.touched) return null;
-    if (ctrl.hasError('required')) return 'Este campo é obrigatório.';
+    if (ctrl.hasError('required')) return this.translate.instant('common.required');
     if (ctrl.hasError('minlength'))
-      return `Mínimo de ${ctrl.errors!['minlength'].requiredLength} caracteres.`;
-    if (ctrl.hasError('email')) return 'Informe um e-mail válido.';
-    if (ctrl.hasError('cpfInvalid')) return 'CPF inválido. Verifique os dígitos.';
-    if (ctrl.hasError('phoneInvalid')) return 'Número de telefone inválido.';
+      return this.translate.instant('common.minLength', {
+        min: ctrl.errors!['minlength'].requiredLength,
+      });
+    if (ctrl.hasError('email')) return this.translate.instant('common.invalidEmail');
+    if (ctrl.hasError('cpfInvalid')) return this.translate.instant('formParticipant.cpfInvalid');
+    if (ctrl.hasError('phoneInvalid')) return this.translate.instant('common.invalidPhone');
     return null;
   }
 

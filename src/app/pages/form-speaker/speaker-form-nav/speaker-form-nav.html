@@ -10,7 +10,7 @@
     class="fab-btn"
     [class.fab-btn--error]="hasAnyError"
     (click)="toggleMobile()"
-    aria-label="Abrir navegação do formulário"
+    [attr.aria-label]="'formSpeaker.nav.fabAriaLabel' | translate"
   >
     <mat-icon>{{ mobileOpen() ? 'close' : 'menu' }}</mat-icon>
   </button>
@@ -25,7 +25,7 @@
 
 <!-- ── Shared nav content ───────────────────────────────────────────────────── -->
 <ng-template #navContent>
-  <p class="nav-section-label">Navegação</p>
+  <p class="nav-section-label">{{ 'formSpeaker.nav.sectionLabel' | translate }}</p>
 
   @for (item of speakerItems(); track item.anchorId) {
     <button

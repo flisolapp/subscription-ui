@@ -3,16 +3,40 @@
     "ok": "OK",
     "accept": "Sim",
     "reject": "Não",
-    "turnOnLightMode": "Ativar o modo claro",
-    "turnOnDarkMode": "Ativar o modo escuro",
     "copied": "Copiado",
     "close": "Fechar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "reviewData": "Revisar dados",
+    "add": "Adicionar",
+    "yes": "Sim",
+    "no": "Não",
+    "required": "Este campo é obrigatório.",
+    "minLength": "Mínimo de {{ min }} caracteres.",
+    "invalidEmail": "Informe um e-mail válido.",
+    "invalidPhone": "Número de telefone inválido.",
+    "sending": "Enviando…",
+    "sentSuccess": "Enviado com sucesso!",
+    "unexpectedError": "Ocorreu um erro inesperado. Tente novamente.",
+    "noConnection": "Sem conexão",
+    "httpError": "Erro {{ status }}"
   },
   "header": {
     "edition": "Edição",
     "turnOnLightMode": "Ativar o modo claro",
     "turnOnDarkMode": "Ativar o modo escuro"
+  },
+  "options": {
+    "student": {
+      "highSchool": "Sim, no ensino médio",
+      "techHighSchool": "Sim, no ensino médio técnico",
+      "university": "Sim, no ensino superior",
+      "graduated": "Não, já terminei o ensino superior",
+      "working": "Não, estou apenas trabalhando",
+      "neither": "Não estou estudando, nem trabalhando",
+      "teacher": "Não, sou professor",
+      "other": "Outro"
+    }
   },
   "subscriptionChoice": {
     "joinUs": "Participe",
@@ -76,6 +100,198 @@
       "-1": "O termo é inválido para pesquisa. É necessário.",
       "-2": "O termo é inválido para pesquisa.",
       "-3": "O termo é inválido para pesquisa. Deve ser um e-mail ou código de certificado."
+    }
+  },
+  "formParticipant": {
+    "title": "Inscreva-se",
+    "description1": "Garanta sua participação no maior evento de software livre.",
+    "description2": "As inscrições são gratuitas - basta se inscrever e fazer parte da comunidade que constrói, compartilha e acredita no software livre.",
+    "name": "Nome",
+    "cpf": "CPF",
+    "cpfHint": "Cadastro de Pessoa Física",
+    "cpfInvalid": "CPF inválido. Verifique os dígitos.",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "usesFreeSoftware": "Usa Software Livre?",
+    "distroLabel": "Qual distribuição GNU/Linux você usa?",
+    "distroSearch": "Buscar distribuição...",
+    "isStudentLabel": "Você é estudante?",
+    "isStudentSelect": "Selecione sua situação...",
+    "institution": "Onde você estuda ou trabalha?",
+    "course": "Qual curso faz ou é formado?",
+    "stateLabel": "Em qual estado você reside?",
+    "stateSearch": "Buscar estado..."
+  },
+  "formCollaborator": {
+    "title": "Quero colaborar",
+    "description1": "Quer ajudar a construir o FLISoL deste ano?",
+    "description2": "Estamos organizando a equipe de colaboradores para planejar o evento, trocar ideias e dividir as tarefas que fazem tudo acontecer.",
+    "description3": "Responda ao questionário abaixo para que possamos iniciar a organização e agendar as primeiras reuniões.",
+    "description4": "Os colaboradores da equipe de organização recebem certificado de participação na organização do evento.",
+    "name": "Nome",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "usesFreeSoftware": "Usa Software Livre?",
+    "distroLabel": "Qual distribuição GNU/Linux você usa?",
+    "distroSearch": "Buscar distribuição...",
+    "isStudentLabel": "Você é estudante?",
+    "isStudentSelect": "Selecione sua situação...",
+    "institution": "Onde você estuda ou trabalha?",
+    "availabilityLabel": "Disponibilidade",
+    "availabilityError": "Selecione ao menos uma disponibilidade.",
+    "areasLabel": "Onde deseja colaborar?",
+    "areasError": "Selecione ao menos uma área de colaboração.",
+    "shifts": {
+      "morningAll": "Manhã - Todos os dias",
+      "afternoonAll": "Tarde - Todos os dias",
+      "eveningAll": "Noite - Todos os dias",
+      "saturdayMorning": "Sábado pela manhã",
+      "saturdayAfternoon": "Sábado pela tarde"
+    },
+    "areas": {
+      "group1": "Grupo 1 – Na busca por patrocínio e apoio",
+      "group2": "Grupo 2 – Na publicidade e divulgação (redes sociais)",
+      "group3": "Grupo 3 – Na organização do blog",
+      "group4": "Grupo 4 – No controle de inscrição (participantes e palestrantes), certificados e controle das atividades",
+      "group5": "Grupo 5 – Na infra-estrutura tecnológica (rede local e wifi, servidores e repositórios)",
+      "group6": "Grupo 6 – Na oficina de instalação (InstallFest) e gravação de imagens em mídias",
+      "group7": "Grupo 7 – Temário (Outras palestras, Oficinas e Mini-cursos)",
+      "group8": "Grupo 8 – Sistema de inscrição",
+      "group9": "Grupo 9 – Organização de salas",
+      "group10": "Grupo 10 – Visita e divulgação em outras IES e escolas",
+      "group11": "Grupo 11 – Filmagem, fotografia e documentário do evento",
+      "group12": "Grupo 12 – Arte Gráfica e material gráfico",
+      "group13": "Grupo 13 – Comunicação colaborativa (divulgação em tempo real nas redes sociais)"
+    }
+  },
+  "formSpeaker": {
+    "title": "Submissão de palestras",
+    "description1": "Faça sua inscrição no maior evento de software livre.",
+    "description2": "As inscrições são gratuitas.",
+    "description3": "Você pode submeter:",
+    "bulletMultipleSpeakers": "vários palestrantes para uma mesma palestra;",
+    "bulletMultipleTalks": "várias palestras para um mesmo palestrante ou grupo de palestrantes.",
+    "description4": "Ou seja: se você tem uma ideia, uma experiência ou algo interessante para compartilhar, este é o lugar. Envie sua proposta e participe do evento.",
+    "speakersHeader": "Palestrante",
+    "speakersHeaderPlural": "Palestrantes",
+    "addSpeaker": "Adicionar palestrante",
+    "talksHeader": "Sobre a atividade",
+    "talksHeaderPlural": "Atividades",
+    "addTalk": "Adicionar atividade",
+    "speakerCard": {
+      "title": "Palestrante {{ n }}",
+      "removeAriaLabel": "Remover palestrante",
+      "photoAriaLabel": "Enviar foto do palestrante",
+      "photoHint": "Enviar foto",
+      "photoDownload": "Baixar foto",
+      "photoRemove": "Remover foto",
+      "photoError": "Envie uma foto.",
+      "photoFormat": "PNG ou JPG",
+      "name": "Nome",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "minicurriculo": "Minicurrículo",
+      "site": "Site (ou endereço do Currículo Lattes)"
+    },
+    "talkCard": {
+      "title": "Atividade {{ n }}",
+      "removeAriaLabel": "Remover atividade",
+      "titleLabel": "Título da Palestra/Oficina",
+      "description": "Descrição",
+      "shiftLabel": "Preferência de turno",
+      "typeLabel": "Tipo de atividade",
+      "subjectLabel": "Assunto (Tema)",
+      "subjectSearch": "Buscar tema...",
+      "slideLabel": "Slide",
+      "slideFormats": "(PDF, ODP ou PPT/X)",
+      "slideChoose": "Escolher arquivo",
+      "slideAriaLabel": "Enviar arquivo de slide",
+      "slideDownload": "Baixar slide",
+      "slideRemove": "Remover slide",
+      "slideUrl": "Endereço do Slide",
+      "slideUrlPlaceholder": "URL do slide (opcional)"
+    },
+    "nav": {
+      "sectionLabel": "Navegação",
+      "fabAriaLabel": "Abrir navegação do formulário"
+    },
+    "shifts": {
+      "morning": "Manhã",
+      "afternoon": "Tarde",
+      "noPreference": "Sem preferência"
+    },
+    "types": {
+      "talk": "Palestra (1 hora)",
+      "workshop": "Oficina (2 horas)"
+    },
+    "temas": {
+      "administracaoDeSistemas": "Administração de Sistemas",
+      "bancoDeDados": "Banco de Dados",
+      "culturaLivre": "Cultura Livre",
+      "desktop": "Desktop",
+      "desenvolvimentoDeSoftware": "Desenvolvimento de Software",
+      "devopsSre": "DevOps / SRE",
+      "educacao": "Educação",
+      "embarcadosIot": "Embarcados / IoT",
+      "infraestrutura": "Infraestrutura",
+      "jogos": "Jogos",
+      "kernel": "Kernel",
+      "redes": "Redes",
+      "seguranca": "Segurança",
+      "web": "Web",
+      "outro": "Outro"
+    }
+  },
+  "formReview": {
+    "confirmationLabel": "Confirmação",
+    "reviewHint": "Revise seus dados antes de confirmar o envio.",
+    "speakerPhotoAlt": "Foto do palestrante",
+    "backAndEdit": "Voltar e editar",
+    "confirmAndSend": "Confirmar e enviar",
+    "fields": {
+      "name": "Nome",
+      "cpf": "CPF",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "usesFreeSoftware": "Usa software livre",
+      "distro": "Distribuição Linux",
+      "academicStatus": "Situação acadêmica",
+      "institution": "Instituição",
+      "course": "Curso",
+      "state": "Estado",
+      "availability": "Disponibilidade",
+      "collaborationAreas": "Áreas de colaboração",
+      "photo": "Foto",
+      "site": "Site",
+      "minicurriculo": "Mini currículo",
+      "talkTitle": "Título",
+      "talkDescription": "Descrição",
+      "shift": "Turno",
+      "type": "Tipo",
+      "subject": "Tema",
+      "slideUrl": "URL do slide",
+      "slideFile": "Arquivo de slide"
+    },
+    "sections": {
+      "speaker": "Palestrante",
+      "speakerN": "Palestrante {{ n }}",
+      "talk": "Atividade",
+      "talkN": "Atividade {{ n }}"
+    },
+    "titles": {
+      "participant": "Inscreva-se",
+      "speaker": "Submissão de palestras",
+      "collaborator": "Quero colaborar"
+    }
+  },
+  "formSuccess": {
+    "allGood": "Tudo certo!",
+    "description": "A sua inscrição foi realizada com sucesso. Até breve!",
+    "newSubscription": "Realizar nova inscrição",
+    "titles": {
+      "participant": "Inscreva-se",
+      "speaker": "Submissão de palestras",
+      "collaborator": "Quero colaborar"
     }
   }
 }

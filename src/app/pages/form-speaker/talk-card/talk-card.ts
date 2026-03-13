@@ -7,36 +7,37 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
-import { SelectOption } from '../../form-participant/form-participant'; // adjust path as needed
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { SelectOption } from '../../form-participant/form-participant';
 
-// ── Static data ───────────────────────────────────────────────────────────────
+// ── Static data - labels are translation keys ─────────────────────────────────
 export const TEMAS: SelectOption[] = [
-  { value: 'administracao-de-sistemas', label: 'Administração de Sistemas' },
-  { value: 'banco-de-dados', label: 'Banco de Dados' },
-  { value: 'cultura-livre', label: 'Cultura Livre' },
-  { value: 'desktop', label: 'Desktop' },
-  { value: 'desenvolvimento-de-software', label: 'Desenvolvimento de Software' },
-  { value: 'devops-sre', label: 'DevOps / SRE' },
-  { value: 'educacao', label: 'Educação' },
-  { value: 'embarcados-iot', label: 'Embarcados / IoT' },
-  { value: 'infraestrutura', label: 'Infraestrutura' },
-  { value: 'jogos', label: 'Jogos' },
-  { value: 'kernel', label: 'Kernel' },
-  { value: 'redes', label: 'Redes' },
-  { value: 'seguranca', label: 'Segurança' },
-  { value: 'web', label: 'Web' },
-  { value: 'outro', label: 'Outro' },
+  { value: 'administracao-de-sistemas', label: 'formSpeaker.temas.administracaoDeSistemas' },
+  { value: 'banco-de-dados', label: 'formSpeaker.temas.bancoDeDados' },
+  { value: 'cultura-livre', label: 'formSpeaker.temas.culturaLivre' },
+  { value: 'desktop', label: 'formSpeaker.temas.desktop' },
+  { value: 'desenvolvimento-de-software', label: 'formSpeaker.temas.desenvolvimentoDeSoftware' },
+  { value: 'devops-sre', label: 'formSpeaker.temas.devopsSre' },
+  { value: 'educacao', label: 'formSpeaker.temas.educacao' },
+  { value: 'embarcados-iot', label: 'formSpeaker.temas.embarcadosIot' },
+  { value: 'infraestrutura', label: 'formSpeaker.temas.infraestrutura' },
+  { value: 'jogos', label: 'formSpeaker.temas.jogos' },
+  { value: 'kernel', label: 'formSpeaker.temas.kernel' },
+  { value: 'redes', label: 'formSpeaker.temas.redes' },
+  { value: 'seguranca', label: 'formSpeaker.temas.seguranca' },
+  { value: 'web', label: 'formSpeaker.temas.web' },
+  { value: 'outro', label: 'formSpeaker.temas.outro' },
 ];
 
 export const TIPOS: SelectOption[] = [
-  { value: 'palestra', label: 'Palestra (1 hora)' },
-  { value: 'oficina', label: 'Oficina (2 horas)' },
+  { value: 'palestra', label: 'formSpeaker.types.talk' },
+  { value: 'oficina', label: 'formSpeaker.types.workshop' },
 ];
 
 export const TURNOS: SelectOption[] = [
-  { value: 'manha', label: 'Manhã' },
-  { value: 'tarde', label: 'Tarde' },
-  { value: 'sem-preferencia', label: 'Sem preferência' },
+  { value: 'manha', label: 'formSpeaker.shifts.morning' },
+  { value: 'tarde', label: 'formSpeaker.shifts.afternoon' },
+  { value: 'sem-preferencia', label: 'formSpeaker.shifts.noPreference' },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -46,6 +47,7 @@ export const TURNOS: SelectOption[] = [
     CommonModule,
     AsyncPipe,
     ReactiveFormsModule,
+    TranslatePipe,
     MatFormField,
     MatLabel,
     MatError,
@@ -81,6 +83,8 @@ export class TalkCard implements OnInit, OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
 
+  constructor(private readonly translate: TranslateService) {}
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.filteredTemas$ = this.group()
@@ -98,9 +102,10 @@ export class TalkCard implements OnInit, OnDestroy {
   }
 
   // ── Autocomplete helpers ───────────────────────────────────────────────────
-  displayTema(value: string): string {
-    return TEMAS.find((t) => t.value === value)?.label ?? value ?? '';
-  }
+  displayTema = (value: string): string => {
+    const found = TEMAS.find((t) => t.value === value);
+    return found ? this.translate.instant(found.label) : (value ?? '');
+  };
 
   selectTema(option: SelectOption): void {
     this.group().get('tema')!.setValue(option.value);
@@ -135,7 +140,7 @@ export class TalkCard implements OnInit, OnDestroy {
     const ctrl = this.group().get(controlName);
     if (!ctrl) return null;
     if (!this.submitted() && !ctrl.touched) return null;
-    if (ctrl.hasError('required')) return 'Este campo é obrigatório.';
+    if (ctrl.hasError('required')) return this.translate.instant('common.required');
     return null;
   }
 
@@ -143,8 +148,10 @@ export class TalkCard implements OnInit, OnDestroy {
   private _filterTemas(val: string): SelectOption[] {
     if (!val || TEMAS.some((t) => t.value === val)) return TEMAS;
     const q = val.toLowerCase();
-    return TEMAS.filter(
-      (t) => t.label.toLowerCase().includes(q) || t.value.toLowerCase().includes(q),
-    );
+    // Filter against translated labels for a better UX
+    return TEMAS.filter((t) => {
+      const translated = this.translate.instant(t.label).toLowerCase();
+      return translated.includes(q) || t.value.toLowerCase().includes(q);
+    });
   }
 }

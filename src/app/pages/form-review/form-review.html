@@ -16,10 +16,12 @@
     <div class="w-full max-w-[960px]">
 
       <!-- ── Header ──────────────────────────────────────────────────────────── -->
-      <p class="text-default text-primary font-semibold tracking-widest uppercase text-sm mb-2">Confirmação</p>
-      <h1 class="text-default text-4xl font-black mb-2">{{ title() }}</h1>
+      <p class="text-default text-primary font-semibold tracking-widest uppercase text-sm mb-2">
+        {{ 'formReview.confirmationLabel' | translate }}
+      </p>
+      <h1 class="text-default text-4xl font-black mb-2">{{ titleKey() | translate }}</h1>
       <p class="text-default text-on-surface-variant mb-10 text-justify">
-        Revise seus dados antes de confirmar o envio.
+        {{ 'formReview.reviewHint' | translate }}
       </p>
 
       <!-- ── Sections ────────────────────────────────────────────────────────── -->
@@ -40,7 +42,7 @@
                   <div class="shrink-0">
                     <img
                       [src]="imageUrl(imgField!.image)"
-                      alt="Foto do palestrante"
+                      [alt]="'formReview.speakerPhotoAlt' | translate"
                       class="w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover border border-outline shadow-sm"
                     />
                   </div>
@@ -54,13 +56,13 @@
                           <dt
                             class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.first!.label }}
                           </dt>
-                          <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '—' }}</dd>
+                          <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '-' }}</dd>
                         </div>
                         <div>
                           <dt
                             class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.second!.label }}
                           </dt>
-                          <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '—' }}</dd>
+                          <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '-' }}</dd>
                         </div>
                       </div>
                     }
@@ -70,7 +72,7 @@
                           class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.field!.label }}
                         </dt>
                         <dd
-                          class="text-default text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '—' }}
+                          class="text-default text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '-' }}
                         </dd>
                       </div>
                     }
@@ -108,13 +110,13 @@
                       <dt
                         class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.first!.label }}
                       </dt>
-                      <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '—' }}</dd>
+                      <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.first!.value || '-' }}</dd>
                     </div>
                     <div>
                       <dt
                         class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.second!.label }}
                       </dt>
-                      <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '—' }}</dd>
+                      <dd class="text-default text-sm mt-0.5 ml-0 break-words">{{ row.second!.value || '-' }}</dd>
                     </div>
                   }
                   @if (row.type === 'single') {
@@ -123,7 +125,7 @@
                         class="text-default text-xs text-on-surface-variant uppercase tracking-wide">{{ row.field!.label }}
                       </dt>
                       <dd
-                        class="text-default text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '—' }}
+                        class="text-default text-sm mt-0.5 ml-0 break-words whitespace-pre-line">{{ row.field!.value || '-' }}
                       </dd>
                     </div>
                   }
@@ -142,7 +144,7 @@
         <div class="flex justify-end gap-3">
           <button mat-button type="button" [disabled]="loading()" (click)="onBack()">
             <mat-icon>arrow_back</mat-icon>
-            Voltar e editar
+            {{ 'formReview.backAndEdit' | translate }}
           </button>
 
           <button
@@ -160,18 +162,18 @@
             } @else if (loading()) {
               <span class="flex items-center gap-1">
                 <mat-icon class="animate-spin">autorenew</mat-icon>
-                Enviando…
+                {{ 'common.sending' | translate }}
               </span>
             } @else {
               <span class="flex items-center gap-1">
                 <mat-icon>check</mat-icon>
-                Confirmar e enviar
+                {{ 'formReview.confirmAndSend' | translate }}
               </span>
             }
           </button>
         </div>
 
-        <!-- Dev / debug actions — remove before production -->
+        <!-- Dev / debug actions - remove before production -->
         <div class="flex justify-end gap-2 border-t border-dashed border-outline pt-4">
           <p class="text-default text-xs text-on-surface-variant self-center mr-2 font-mono">DEV</p>
 
@@ -180,7 +182,7 @@
             type="button"
             [disabled]="loading()"
             (click)="onConfirmSimple()"
-            title="Plain JSON/multipart POST — no progress events"
+            title="Plain JSON/multipart POST - no progress events"
           >
             <mat-icon>send</mat-icon>
             Simple POST
@@ -191,7 +193,7 @@
             type="button"
             [disabled]="loading()"
             (click)="onConfirmDry()"
-            title="Logs serialised payload to console — no network request"
+            title="Logs serialised payload to console - no network request"
           >
             <mat-icon>bug_report</mat-icon>
             Dry run

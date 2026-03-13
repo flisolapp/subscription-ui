@@ -5,12 +5,38 @@
     "reject": "No",
     "copied": "Copied",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "back": "Back",
+    "reviewData": "Review data",
+    "add": "Add",
+    "yes": "Yes",
+    "no": "No",
+    "required": "This field is required.",
+    "minLength": "Minimum {{ min }} characters.",
+    "invalidEmail": "Enter a valid email.",
+    "invalidPhone": "Invalid phone number.",
+    "sending": "Sending…",
+    "sentSuccess": "Sent successfully!",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "noConnection": "No connection",
+    "httpError": "Error {{ status }}"
   },
   "header": {
     "edition": "Edition",
     "turnOnLightMode": "Turn on light mode",
     "turnOnDarkMode": "Turn on dark mode"
+  },
+  "options": {
+    "student": {
+      "highSchool": "Yes, in high school",
+      "techHighSchool": "Yes, in technical high school",
+      "university": "Yes, in higher education",
+      "graduated": "No, I have already finished higher education",
+      "working": "No, I am just working",
+      "neither": "I am not studying, nor working",
+      "teacher": "No, I am a teacher",
+      "other": "Other"
+    }
   },
   "subscriptionChoice": {
     "joinUs": "Join us",
@@ -74,6 +100,198 @@
       "-1": "The term is invalid to search. It is required.",
       "-2": "The term is invalid to search.",
       "-3": "The term is invalid to search. Must be an e-mail or certificate's code."
+    }
+  },
+  "formParticipant": {
+    "title": "Subscribe",
+    "description1": "Secure your spot at the biggest free software event.",
+    "description2": "Registration is free - just sign up and be part of the community that builds, shares and believes in free software.",
+    "name": "Name",
+    "cpf": "CPF",
+    "cpfHint": "Brazilian Individual Taxpayer Registry",
+    "cpfInvalid": "Invalid CPF. Please check the digits.",
+    "email": "Email",
+    "phone": "Phone",
+    "usesFreeSoftware": "Do you use Free Software?",
+    "distroLabel": "Which GNU/Linux distribution do you use?",
+    "distroSearch": "Search distribution...",
+    "isStudentLabel": "Are you a student?",
+    "isStudentSelect": "Select your situation...",
+    "institution": "Where do you study or work?",
+    "course": "What course are you taking or graduated from?",
+    "stateLabel": "Which state do you live in?",
+    "stateSearch": "Search state..."
+  },
+  "formCollaborator": {
+    "title": "I want to collaborate",
+    "description1": "Do you want to help build this year's FLISoL?",
+    "description2": "We are organising the team of collaborators to plan the event, exchange ideas and divide the tasks that make everything happen.",
+    "description3": "Fill in the questionnaire below so we can start organising and schedule the first meetings.",
+    "description4": "Collaborators in the organising team receive a participation certificate for the organisation of the event.",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "usesFreeSoftware": "Do you use Free Software?",
+    "distroLabel": "Which GNU/Linux distribution do you use?",
+    "distroSearch": "Search distribution...",
+    "isStudentLabel": "Are you a student?",
+    "isStudentSelect": "Select your situation...",
+    "institution": "Where do you study or work?",
+    "availabilityLabel": "Availability",
+    "availabilityError": "Select at least one availability slot.",
+    "areasLabel": "Where would you like to collaborate?",
+    "areasError": "Select at least one collaboration area.",
+    "shifts": {
+      "morningAll": "Morning - Every day",
+      "afternoonAll": "Afternoon - Every day",
+      "eveningAll": "Evening - Every day",
+      "saturdayMorning": "Saturday morning",
+      "saturdayAfternoon": "Saturday afternoon"
+    },
+    "areas": {
+      "group1": "Group 1 – Seeking sponsorship and support",
+      "group2": "Group 2 – Publicity and outreach (social media)",
+      "group3": "Group 3 – Blog organisation",
+      "group4": "Group 4 – Registration control (participants and speakers), certificates and activity tracking",
+      "group5": "Group 5 – Tech infrastructure (local network and wifi, servers and repositories)",
+      "group6": "Group 6 – Installation workshop (InstallFest) and media imaging",
+      "group7": "Group 7 – Programme (Other talks, Workshops and Short courses)",
+      "group8": "Group 8 – Registration system",
+      "group9": "Group 9 – Room organisation",
+      "group10": "Group 10 – Outreach visits to other universities and schools",
+      "group11": "Group 11 – Filming, photography and event documentary",
+      "group12": "Group 12 – Graphic art and printed materials",
+      "group13": "Group 13 – Collaborative communication (real-time social media updates)"
+    }
+  },
+  "formSpeaker": {
+    "title": "Talk submission",
+    "description1": "Register for the biggest free software event.",
+    "description2": "Registrations are free.",
+    "description3": "You can submit:",
+    "bulletMultipleSpeakers": "multiple speakers for the same talk;",
+    "bulletMultipleTalks": "multiple talks for the same speaker or group of speakers.",
+    "description4": "In other words: if you have an idea, an experience or something interesting to share, this is the place. Send your proposal and be part of the event.",
+    "speakersHeader": "Speaker",
+    "speakersHeaderPlural": "Speakers",
+    "addSpeaker": "Add speaker",
+    "talksHeader": "About the activity",
+    "talksHeaderPlural": "Activities",
+    "addTalk": "Add activity",
+    "speakerCard": {
+      "title": "Speaker {{ n }}",
+      "removeAriaLabel": "Remove speaker",
+      "photoAriaLabel": "Upload speaker photo",
+      "photoHint": "Upload photo",
+      "photoDownload": "Download photo",
+      "photoRemove": "Remove photo",
+      "photoError": "Please upload a photo.",
+      "photoFormat": "PNG or JPG",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "minicurriculo": "Short bio",
+      "site": "Website (or Lattes CV link)"
+    },
+    "talkCard": {
+      "title": "Activity {{ n }}",
+      "removeAriaLabel": "Remove activity",
+      "titleLabel": "Talk/Workshop title",
+      "description": "Description",
+      "shiftLabel": "Preferred time slot",
+      "typeLabel": "Activity type",
+      "subjectLabel": "Subject (Topic)",
+      "subjectSearch": "Search topic...",
+      "slideLabel": "Slides",
+      "slideFormats": "(PDF, ODP or PPT/X)",
+      "slideChoose": "Choose file",
+      "slideAriaLabel": "Upload slide file",
+      "slideDownload": "Download slide",
+      "slideRemove": "Remove slide",
+      "slideUrl": "Slide URL",
+      "slideUrlPlaceholder": "Slide URL (optional)"
+    },
+    "nav": {
+      "sectionLabel": "Navigation",
+      "fabAriaLabel": "Open form navigation"
+    },
+    "shifts": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "noPreference": "No preference"
+    },
+    "types": {
+      "talk": "Talk (1 hour)",
+      "workshop": "Workshop (2 hours)"
+    },
+    "temas": {
+      "administracaoDeSistemas": "System Administration",
+      "bancoDeDados": "Databases",
+      "culturaLivre": "Free Culture",
+      "desktop": "Desktop",
+      "desenvolvimentoDeSoftware": "Software Development",
+      "devopsSre": "DevOps / SRE",
+      "educacao": "Education",
+      "embarcadosIot": "Embedded / IoT",
+      "infraestrutura": "Infrastructure",
+      "jogos": "Gaming",
+      "kernel": "Kernel",
+      "redes": "Networking",
+      "seguranca": "Security",
+      "web": "Web",
+      "outro": "Other"
+    }
+  },
+  "formReview": {
+    "confirmationLabel": "Confirmation",
+    "reviewHint": "Review your data before confirming submission.",
+    "speakerPhotoAlt": "Speaker photo",
+    "backAndEdit": "Back and edit",
+    "confirmAndSend": "Confirm and send",
+    "fields": {
+      "name": "Name",
+      "cpf": "CPF",
+      "email": "Email",
+      "phone": "Phone",
+      "usesFreeSoftware": "Uses free software",
+      "distro": "Linux distribution",
+      "academicStatus": "Academic status",
+      "institution": "Institution",
+      "course": "Course",
+      "state": "State",
+      "availability": "Availability",
+      "collaborationAreas": "Collaboration areas",
+      "photo": "Photo",
+      "site": "Website",
+      "minicurriculo": "Short bio",
+      "talkTitle": "Title",
+      "talkDescription": "Description",
+      "shift": "Time slot",
+      "type": "Type",
+      "subject": "Topic",
+      "slideUrl": "Slide URL",
+      "slideFile": "Slide file"
+    },
+    "sections": {
+      "speaker": "Speaker",
+      "speakerN": "Speaker {{ n }}",
+      "talk": "Activity",
+      "talkN": "Activity {{ n }}"
+    },
+    "titles": {
+      "participant": "Subscribe",
+      "speaker": "Talk submission",
+      "collaborator": "I want to collaborate"
+    }
+  },
+  "formSuccess": {
+    "allGood": "All done!",
+    "description": "Your registration was completed successfully. See you soon!",
+    "newSubscription": "New registration",
+    "titles": {
+      "participant": "Subscribe",
+      "speaker": "Talk submission",
+      "collaborator": "I want to collaborate"
     }
   }
 }

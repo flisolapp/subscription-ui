@@ -112,7 +112,7 @@ export class SubscriptionService {
 
   // ── 3. submitDry() ──────────────────────────────────────────────────────────
   /**
-   * Development / debug helper — NO network request is made.
+   * Development / debug helper - NO network request is made.
    *
    * Resolves the payload exactly as the real methods would serialise it,
    * logs a detailed breakdown to the console, and returns a mock response

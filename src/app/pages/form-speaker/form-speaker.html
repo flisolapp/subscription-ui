@@ -14,19 +14,23 @@
         <button matIconButton (click)="onBack()" class="mr-2">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        Submissão de palestras
+        {{ 'formSpeaker.title' | translate }}
       </h1>
-      <p class="text-default text-muted-foreground mb-2 text-justify">Faça sua inscrição no maior evento de software
-        livre.</p>
-      <p class="text-default text-muted-foreground mb-2 text-justify">As inscrições são gratuitas.</p>
-      <p class="text-default text-muted-foreground mb-2 text-justify">Você pode submeter:</p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">
+        {{ 'formSpeaker.description1' | translate }}
+      </p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">
+        {{ 'formSpeaker.description2' | translate }}
+      </p>
+      <p class="text-default text-muted-foreground mb-2 text-justify">
+        {{ 'formSpeaker.description3' | translate }}
+      </p>
       <ul class="text-default text-muted-foreground list-disc list-inside ml-2 mb-4 space-y-1">
-        <li>vários palestrantes para uma mesma palestra;</li>
-        <li>várias palestras para um mesmo palestrante ou grupo de palestrantes.</li>
+        <li>{{ 'formSpeaker.bulletMultipleSpeakers' | translate }}</li>
+        <li>{{ 'formSpeaker.bulletMultipleTalks' | translate }}</li>
       </ul>
       <p class="text-default text-muted-foreground mb-10 text-justify">
-        Ou seja: se você tem uma ideia, uma experiência ou algo interessante para compartilhar,
-        este é o lugar. Envie sua proposta e participe do evento.
+        {{ 'formSpeaker.description4' | translate }}
       </p>
 
       <form class="speaker-form" [formGroup]="form" (ngSubmit)="onSubmit($event)" novalidate>
@@ -34,13 +38,12 @@
         <!-- ── Speakers ──────────────────────────────────────────────────── -->
         <div class="section-header">
           <h2 class="text-default text-xl font-bold text-foreground">
-            {{ speakersArray.length > 1 ? 'Palestrantes' : 'Palestrante' }}
+            {{ (speakersArray.length > 1 ? 'formSpeaker.speakersHeaderPlural' : 'formSpeaker.speakersHeader') | translate }}
           </h2>
           <button mat-stroked-button type="button" (click)="addSpeaker()">
             <mat-icon>add</mat-icon>
-
-            <span class="sm:hidden">Adicionar</span>
-            <span class="hidden sm:inline">Adicionar palestrante</span>
+            <span class="sm:hidden">{{ 'common.add' | translate }}</span>
+            <span class="hidden sm:inline">{{ 'formSpeaker.addSpeaker' | translate }}</span>
           </button>
         </div>
 
@@ -61,13 +64,12 @@
         <!-- ── Talks ─────────────────────────────────────────────────────── -->
         <div class="section-header">
           <h2 class="text-default text-xl font-bold text-foreground">
-            {{ talksArray.length > 1 ? 'Atividades' : 'Sobre a atividade' }}
+            {{ (talksArray.length > 1 ? 'formSpeaker.talksHeaderPlural' : 'formSpeaker.talksHeader') | translate }}
           </h2>
           <button mat-stroked-button type="button" (click)="addTalk()">
             <mat-icon>add</mat-icon>
-
-            <span class="sm:hidden">Adicionar</span>
-            <span class="hidden sm:inline">Adicionar atividade</span>
+            <span class="sm:hidden">{{ 'common.add' | translate }}</span>
+            <span class="hidden sm:inline">{{ 'formSpeaker.addTalk' | translate }}</span>
           </button>
         </div>
 
@@ -89,10 +91,10 @@
         <div class="form-actions">
           <button mat-button type="button" (click)="onBack()">
             <mat-icon>arrow_back</mat-icon>
-            Voltar
+            {{ 'common.back' | translate }}
           </button>
           <button mat-flat-button color="primary" type="submit">
-            Revisar dados
+            {{ 'common.reviewData' | translate }}
           </button>
         </div>
 

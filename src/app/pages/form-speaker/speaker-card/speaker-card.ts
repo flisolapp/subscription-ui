@@ -13,6 +13,7 @@ import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/in
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 // ── Phone validator ───────────────────────────────────────────────────────────
 export function phoneValidator(control: AbstractControl): ValidationErrors | null {
@@ -27,6 +28,7 @@ export function phoneValidator(control: AbstractControl): ValidationErrors | nul
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    TranslatePipe,
     MatFormField,
     MatLabel,
     MatError,
@@ -52,7 +54,7 @@ export class SpeakerCard implements OnDestroy {
   readonly photoPreviewUrl = signal<string | null>(null);
   private previousUrl: string | null = null;
 
-  constructor() {
+  constructor(private readonly translate: TranslateService) {
     effect(() => {
       const file = this.photo();
       if (this.previousUrl) {
@@ -111,11 +113,13 @@ export class SpeakerCard implements OnDestroy {
     const ctrl = this.group().get(controlName);
     if (!ctrl) return null;
     if (!this.submitted() && !ctrl.touched) return null;
-    if (ctrl.hasError('required')) return 'Este campo é obrigatório.';
+    if (ctrl.hasError('required')) return this.translate.instant('common.required');
     if (ctrl.hasError('minlength'))
-      return `Mínimo de ${ctrl.errors!['minlength'].requiredLength} caracteres.`;
-    if (ctrl.hasError('email')) return 'Informe um e-mail válido.';
-    if (ctrl.hasError('phoneInvalid')) return 'Número de telefone inválido.';
+      return this.translate.instant('common.minLength', {
+        min: ctrl.errors!['minlength'].requiredLength,
+      });
+    if (ctrl.hasError('email')) return this.translate.instant('common.invalidEmail');
+    if (ctrl.hasError('phoneInvalid')) return this.translate.instant('common.invalidPhone');
     return null;
   }
 

@@ -5,12 +5,38 @@
     "reject": "No",
     "copied": "Copiado",
     "close": "Cerrar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "back": "Volver",
+    "reviewData": "Revisar datos",
+    "add": "Agregar",
+    "yes": "Sí",
+    "no": "No",
+    "required": "Este campo es obligatorio.",
+    "minLength": "Mínimo {{ min }} caracteres.",
+    "invalidEmail": "Ingresa un correo electrónico válido.",
+    "invalidPhone": "Número de teléfono inválido.",
+    "sending": "Enviando…",
+    "sentSuccess": "¡Enviado con éxito!",
+    "unexpectedError": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "noConnection": "Sin conexión",
+    "httpError": "Error {{ status }}"
   },
   "header": {
     "edition": "Edición",
     "turnOnLightMode": "Activar el modo claro",
     "turnOnDarkMode": "Activar el modo oscuro"
+  },
+  "options": {
+    "student": {
+      "highSchool": "Sí, en la escuela secundaria",
+      "techHighSchool": "Sí, en la escuela secundaria técnica",
+      "university": "Sí, en la educación superior",
+      "graduated": "No, ya terminé la educación superior",
+      "working": "No, solo estoy trabajando",
+      "neither": "No estoy estudiando ni trabajando",
+      "teacher": "No, soy profesor/a",
+      "other": "Otro"
+    }
   },
   "subscriptionChoice": {
     "joinUs": "Únete a nosotros",
@@ -47,7 +73,7 @@
   },
   "search": {
     "title": "Validador de Certificado",
-    "description": "Valide de forma centralizada, fácil y rápido o certificado emitido pelo FLISoL.",
+    "description": "Valide de forma centralizada, fácil y rápido el certificado emitido por FLISoL.",
     "termSearchPlace": "Introduce tu email o código",
     "notFound": "No se han encontrado resultados.",
     "oneFound": "certificado encontrado.",
@@ -74,6 +100,198 @@
       "-1": "El término no es válido para buscar. Es requerido.",
       "-2": "El término no es válido para buscar.",
       "-3": "El término no es válido para buscar. Debe ser un correo electrónico o un código de certificado."
+    }
+  },
+  "formParticipant": {
+    "title": "Suscribirse",
+    "description1": "Asegura tu lugar en el mayor evento de software libre.",
+    "description2": "La inscripción es gratuita - solo regístrate y sé parte de la comunidad que construye, comparte y cree en el software libre.",
+    "name": "Nombre",
+    "cpf": "CPF",
+    "cpfHint": "Registro de Contribuyente Individual de Brasil",
+    "cpfInvalid": "CPF inválido. Verifica los dígitos.",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "usesFreeSoftware": "¿Usas Software Libre?",
+    "distroLabel": "¿Qué distribución GNU/Linux usas?",
+    "distroSearch": "Buscar distribución...",
+    "isStudentLabel": "¿Eres estudiante?",
+    "isStudentSelect": "Selecciona tu situación...",
+    "institution": "¿Dónde estudias o trabajas?",
+    "course": "¿Qué carrera cursas o de cuál te graduaste?",
+    "stateLabel": "¿En qué estado resides?",
+    "stateSearch": "Buscar estado..."
+  },
+  "formCollaborator": {
+    "title": "Quiero colaborar",
+    "description1": "¿Quieres ayudar a construir el FLISoL de este año?",
+    "description2": "Estamos organizando el equipo de colaboradores para planificar el evento, intercambiar ideas y dividir las tareas que hacen que todo suceda.",
+    "description3": "Responde el cuestionario a continuación para que podamos iniciar la organización y programar las primeras reuniones.",
+    "description4": "Los colaboradores del equipo organizador reciben un certificado de participación en la organización del evento.",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "usesFreeSoftware": "¿Usas Software Libre?",
+    "distroLabel": "¿Qué distribución GNU/Linux usas?",
+    "distroSearch": "Buscar distribución...",
+    "isStudentLabel": "¿Eres estudiante?",
+    "isStudentSelect": "Selecciona tu situación...",
+    "institution": "¿Dónde estudias o trabajas?",
+    "availabilityLabel": "Disponibilidad",
+    "availabilityError": "Selecciona al menos una disponibilidad.",
+    "areasLabel": "¿Dónde deseas colaborar?",
+    "areasError": "Selecciona al menos un área de colaboración.",
+    "shifts": {
+      "morningAll": "Mañana - Todos los días",
+      "afternoonAll": "Tarde - Todos los días",
+      "eveningAll": "Noche - Todos los días",
+      "saturdayMorning": "Sábado por la mañana",
+      "saturdayAfternoon": "Sábado por la tarde"
+    },
+    "areas": {
+      "group1": "Grupo 1 – En la búsqueda de patrocinio y apoyo",
+      "group2": "Grupo 2 – En publicidad y difusión (redes sociales)",
+      "group3": "Grupo 3 – En la organización del blog",
+      "group4": "Grupo 4 – En el control de inscripciones (participantes y oradores), certificados y control de actividades",
+      "group5": "Grupo 5 – En infraestructura tecnológica (red local y wifi, servidores y repositorios)",
+      "group6": "Grupo 6 – En el taller de instalación (InstallFest) y grabación de imágenes en medios",
+      "group7": "Grupo 7 – Temario (Otras charlas, Talleres y Mini-cursos)",
+      "group8": "Grupo 8 – Sistema de inscripción",
+      "group9": "Grupo 9 – Organización de salas",
+      "group10": "Grupo 10 – Visitas y difusión en otras universidades y escuelas",
+      "group11": "Grupo 11 – Filmación, fotografía y documental del evento",
+      "group12": "Grupo 12 – Arte gráfico y material gráfico",
+      "group13": "Grupo 13 – Comunicación colaborativa (difusión en tiempo real en redes sociales)"
+    }
+  },
+  "formSpeaker": {
+    "title": "Envío de charlas",
+    "description1": "Regístrate en el mayor evento de software libre.",
+    "description2": "Las inscripciones son gratuitas.",
+    "description3": "Puedes enviar:",
+    "bulletMultipleSpeakers": "varios oradores para una misma charla;",
+    "bulletMultipleTalks": "varias charlas para un mismo orador o grupo de oradores.",
+    "description4": "Es decir: si tienes una idea, una experiencia o algo interesante para compartir, este es el lugar. Envía tu propuesta y participa del evento.",
+    "speakersHeader": "Orador",
+    "speakersHeaderPlural": "Oradores",
+    "addSpeaker": "Agregar orador",
+    "talksHeader": "Sobre la actividad",
+    "talksHeaderPlural": "Actividades",
+    "addTalk": "Agregar actividad",
+    "speakerCard": {
+      "title": "Orador {{ n }}",
+      "removeAriaLabel": "Eliminar orador",
+      "photoAriaLabel": "Subir foto del orador",
+      "photoHint": "Subir foto",
+      "photoDownload": "Descargar foto",
+      "photoRemove": "Eliminar foto",
+      "photoError": "Por favor sube una foto.",
+      "photoFormat": "PNG o JPG",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "minicurriculo": "Breve biografía",
+      "site": "Sitio web (o enlace al CV)"
+    },
+    "talkCard": {
+      "title": "Actividad {{ n }}",
+      "removeAriaLabel": "Eliminar actividad",
+      "titleLabel": "Título de la Charla/Taller",
+      "description": "Descripción",
+      "shiftLabel": "Preferencia de turno",
+      "typeLabel": "Tipo de actividad",
+      "subjectLabel": "Tema",
+      "subjectSearch": "Buscar tema...",
+      "slideLabel": "Presentación",
+      "slideFormats": "(PDF, ODP o PPT/X)",
+      "slideChoose": "Elegir archivo",
+      "slideAriaLabel": "Subir archivo de presentación",
+      "slideDownload": "Descargar presentación",
+      "slideRemove": "Eliminar presentación",
+      "slideUrl": "URL de la presentación",
+      "slideUrlPlaceholder": "URL de la presentación (opcional)"
+    },
+    "nav": {
+      "sectionLabel": "Navegación",
+      "fabAriaLabel": "Abrir navegación del formulario"
+    },
+    "shifts": {
+      "morning": "Mañana",
+      "afternoon": "Tarde",
+      "noPreference": "Sin preferencia"
+    },
+    "types": {
+      "talk": "Charla (1 hora)",
+      "workshop": "Taller (2 horas)"
+    },
+    "temas": {
+      "administracaoDeSistemas": "Administración de Sistemas",
+      "bancoDeDados": "Bases de Datos",
+      "culturaLivre": "Cultura Libre",
+      "desktop": "Escritorio",
+      "desenvolvimentoDeSoftware": "Desarrollo de Software",
+      "devopsSre": "DevOps / SRE",
+      "educacao": "Educación",
+      "embarcadosIot": "Embebidos / IoT",
+      "infraestrutura": "Infraestructura",
+      "jogos": "Videojuegos",
+      "kernel": "Kernel",
+      "redes": "Redes",
+      "seguranca": "Seguridad",
+      "web": "Web",
+      "outro": "Otro"
+    }
+  },
+  "formReview": {
+    "confirmationLabel": "Confirmación",
+    "reviewHint": "Revisa tus datos antes de confirmar el envío.",
+    "speakerPhotoAlt": "Foto del orador",
+    "backAndEdit": "Volver y editar",
+    "confirmAndSend": "Confirmar y enviar",
+    "fields": {
+      "name": "Nombre",
+      "cpf": "CPF",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "usesFreeSoftware": "Usa software libre",
+      "distro": "Distribución Linux",
+      "academicStatus": "Situación académica",
+      "institution": "Institución",
+      "course": "Carrera",
+      "state": "Estado",
+      "availability": "Disponibilidad",
+      "collaborationAreas": "Áreas de colaboración",
+      "photo": "Foto",
+      "site": "Sitio web",
+      "minicurriculo": "Breve biografía",
+      "talkTitle": "Título",
+      "talkDescription": "Descripción",
+      "shift": "Turno",
+      "type": "Tipo",
+      "subject": "Tema",
+      "slideUrl": "URL de presentación",
+      "slideFile": "Archivo de presentación"
+    },
+    "sections": {
+      "speaker": "Orador",
+      "speakerN": "Orador {{ n }}",
+      "talk": "Actividad",
+      "talkN": "Actividad {{ n }}"
+    },
+    "titles": {
+      "participant": "Suscribirse",
+      "speaker": "Envío de charlas",
+      "collaborator": "Quiero colaborar"
+    }
+  },
+  "formSuccess": {
+    "allGood": "¡Todo listo!",
+    "description": "Tu inscripción se realizó con éxito. ¡Hasta pronto!",
+    "newSubscription": "Nueva inscripción",
+    "titles": {
+      "participant": "Suscribirse",
+      "speaker": "Envío de charlas",
+      "collaborator": "Quiero colaborar"
     }
   }
 }
