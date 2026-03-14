@@ -56,7 +56,7 @@ export function buildParticipantSections(
     {
       fields: [
         { label: t('formReview.fields.name'), value: String(data['name'] ?? '') },
-        { label: t('formReview.fields.cpf'), value: String(data['federalCode'] ?? '') },
+        { label: t('formReview.fields.federalCode'), value: String(data['federalCode'] ?? '') },
         { label: t('formReview.fields.email'), value: String(data['email'] ?? ''), inline: true },
         { label: t('formReview.fields.phone'), value: String(data['phone'] ?? ''), inline: true },
         {

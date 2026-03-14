@@ -26,9 +26,9 @@
           }
         </mat-form-field>
 
-        <!-- CPF -->
+        <!-- Federal Code -->
         <mat-form-field class="participant-field">
-          <mat-label>{{ 'formParticipant.cpf' | translate }}</mat-label>
+          <mat-label>{{ 'formParticipant.federalCode' | translate }}</mat-label>
           <input
             matInput
             formControlName="federalCode"
@@ -37,7 +37,7 @@
             autocomplete="off"
             (input)="onFederalCodeInput($event)"
           />
-          <mat-hint>{{ 'formParticipant.cpfHint' | translate }}</mat-hint>
+          <mat-hint>{{ 'formParticipant.federalCodeHint' | translate }}</mat-hint>
           @if (hasError('federalCode')) {
             <mat-error>{{ getError('federalCode') }}</mat-error>
           }
