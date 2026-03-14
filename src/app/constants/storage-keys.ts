@@ -9,6 +9,9 @@
 // ── localStorage keys ─────────────────────────────────────────────────────────
 
 export const STORAGE_KEYS = {
+  // Edition
+  EDITION: 'flisol_edition',
+
   // Form data
   PARTICIPANT: 'flisol_form_participant',
   SPEAKERS: 'flisol_form_speakers',

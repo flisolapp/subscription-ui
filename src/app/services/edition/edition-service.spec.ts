@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Subscription } from './subscription';
+import { EditionService } from './edition-service';
 
-describe('Subscription', () => {
-  let service: Subscription;
+describe('EditionService', () => {
+  let service: EditionService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Subscription);
+    service = TestBed.inject(EditionService);
   });
 
   it('should be created', () => {

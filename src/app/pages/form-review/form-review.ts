@@ -13,7 +13,7 @@ import {
   SubscriptionError,
   SubscriptionService,
   SubscriptionValidationError,
-} from '../../services/subscription/subscription';
+} from '../../services/subscription/subscription-service';
 import { FormStorageService } from '../../services/form-storage/form-storage-service';
 import {
   buildCollaboratorSections,
