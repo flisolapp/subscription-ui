@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
+import { MatError, MatFormField, MatHint, MatInput, MatLabel } from '@angular/material/input';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -17,6 +17,7 @@ import { CustomValidators } from '../../forms/custom-validators/custom-validator
 import {
   buildDisplayLabel,
   filterOptions,
+  formatCpf,
   formatPhone,
   getControlError,
 } from '../../forms/form-field/form-field';
@@ -40,6 +41,7 @@ import { STORAGE_KEYS } from '../../constants/storage-keys';
     MatFormField,
     MatLabel,
     MatError,
+    MatHint,
     MatInput,
     MatRadioGroup,
     MatRadioButton,
@@ -84,6 +86,7 @@ export class FormCollaborator implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
+      federalCode: ['', [Validators.required, CustomValidators.cpfValidator]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, CustomValidators.phoneValidator]],
       usesFreeSoftware: ['', Validators.required],
@@ -109,6 +112,11 @@ export class FormCollaborator implements OnInit, OnDestroy {
   }
 
   // ── Input masks ────────────────────────────────────────────────────────────
+
+  public onFederalCodeInput(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    this.form.get('federalCode')!.setValue(formatCpf(raw), { emitEvent: true });
+  }
 
   public onPhoneInput(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
@@ -152,7 +160,9 @@ export class FormCollaborator implements OnInit, OnDestroy {
   // ── Validation helpers ─────────────────────────────────────────────────────
 
   public getError(controlName: string): string | null {
-    return getControlError(this.form.get(controlName), this.submittedSig(), this.translate);
+    return getControlError(this.form.get(controlName), this.submittedSig(), this.translate, {
+      cpfInvalid: 'formCollaborator.federalCodeInvalid',
+    });
   }
 
   public hasError(controlName: string): boolean {

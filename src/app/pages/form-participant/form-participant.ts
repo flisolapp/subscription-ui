@@ -134,7 +134,7 @@ export class FormParticipant implements OnInit, OnDestroy {
 
   public getError(controlName: string): string | null {
     return getControlError(this.form.get(controlName), this.submitted(), this.translate, {
-      cpfInvalid: 'formParticipant.cpfInvalid',
+      cpfInvalid: 'formParticipant.federalCodeInvalid',
     });
   }
 

@@ -9,13 +9,13 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
+import { MatError, MatFormField, MatHint, MatInput, MatLabel } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { formatPhone, getControlError } from '../../../forms/form-field/form-field';
+import { formatCpf, formatPhone, getControlError } from '../../../forms/form-field/form-field';
 
 @Component({
   selector: 'app-speaker-card',
@@ -26,6 +26,7 @@ import { formatPhone, getControlError } from '../../../forms/form-field/form-fie
     MatFormField,
     MatLabel,
     MatError,
+    MatHint,
     MatInput,
     MatIconButton,
     MatIcon,
@@ -72,6 +73,11 @@ export class SpeakerCard implements OnDestroy {
 
   // ── Input masks ────────────────────────────────────────────────────────────
 
+  onFederalCodeInput(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    this.group().get('federalCode')!.setValue(formatCpf(raw), { emitEvent: true });
+  }
+
   onPhoneInput(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
     this.group().get('phone')!.setValue(formatPhone(raw), { emitEvent: true });
@@ -100,7 +106,9 @@ export class SpeakerCard implements OnDestroy {
   // ── Validation helpers ─────────────────────────────────────────────────────
 
   getError(controlName: string): string | null {
-    return getControlError(this.group().get(controlName), this.submitted(), this.translate);
+    return getControlError(this.group().get(controlName), this.submitted(), this.translate, {
+      cpfInvalid: 'formSpeaker.federalCodeInvalid',
+    });
   }
 
   hasError(controlName: string): boolean {

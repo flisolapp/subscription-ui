@@ -335,6 +335,7 @@ export class SubscriptionService {
         payload['availabilities'] ??
           payload['availabilityShifts'] ??
           payload['collaboratorShifts'] ??
+          payload['shifts'] ??
           [],
       ),
     };

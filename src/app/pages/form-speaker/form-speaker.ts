@@ -19,6 +19,7 @@ import { NavItem, SpeakerFormNav } from './speaker-form-nav/speaker-form-nav';
 
 interface SerializedSpeaker {
   name: string;
+  federalCode: string;
   email: string;
   phone: string;
   minicurriculo: string;
@@ -308,6 +309,7 @@ export class FormSpeaker implements OnInit, OnDestroy {
   private createSpeakerGroup(): FormGroup {
     return this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
+      federalCode: ['', [Validators.required, CustomValidators.cpfValidator]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, CustomValidators.phoneValidator]],
       minicurriculo: ['', [Validators.required, Validators.minLength(10)]],

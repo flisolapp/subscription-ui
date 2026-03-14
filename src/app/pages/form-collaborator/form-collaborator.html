@@ -32,6 +32,23 @@
           }
         </mat-form-field>
 
+        <!-- Federal Code -->
+        <mat-form-field class="collaborator-field">
+          <mat-label>{{ 'formCollaborator.federalCode' | translate }}</mat-label>
+          <input
+            matInput
+            formControlName="federalCode"
+            placeholder="000.000.000-00"
+            inputmode="numeric"
+            autocomplete="off"
+            (input)="onFederalCodeInput($event)"
+          />
+          <mat-hint>{{ 'formCollaborator.federalCodeHint' | translate }}</mat-hint>
+          @if (hasError('federalCode')) {
+            <mat-error>{{ getError('federalCode') }}</mat-error>
+          }
+        </mat-form-field>
+
         <!-- E-mail -->
         <mat-form-field class="collaborator-field">
           <mat-label>{{ 'formCollaborator.email' | translate }}</mat-label>
