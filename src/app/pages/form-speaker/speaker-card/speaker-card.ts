@@ -107,7 +107,7 @@ export class SpeakerCard implements OnDestroy {
 
   getError(controlName: string): string | null {
     return getControlError(this.group().get(controlName), this.submitted(), this.translate, {
-      cpfInvalid: 'formSpeaker.federalCodeInvalid',
+      cpfInvalid: 'formSpeaker.speakerCard.federalCodeInvalid',
     });
   }
 

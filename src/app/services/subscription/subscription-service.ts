@@ -344,34 +344,81 @@ export class SubscriptionService {
   /**
    * Maps the speaker form payload to the backend contract.
    *
-   * Extra speaker fields expected by Laravel:
-   * - title
-   * - description
-   * - shift
-   * - kind
-   * - talk_subject_id
-   * - slide_file
-   * - slide_url
+   * The frontend payload has a nested structure supporting multiple speakers
+   * and multiple talks:
    *
-   * Frontend aliases accepted here:
-   * - subject / talkSubject / talkSubjectId -> talk_subject_id
-   * - slideFile -> slide_file
-   * - slideUrl -> slide_url
+   *   { speakers: [ { name, federalCode, email, phone, minicurriculo, site, photo } ],
+   *     talks:    [ { titulo, descricao, turno, tipo, tema, slideFile, slideUrl } ] }
+   *
+   * This mapper preserves both arrays in full and renames fields to the
+   * backend convention. Laravel receives them as:
+   *   speakers[0][name], speakers[0][photo], …, speakers[N][…]
+   *   talks[0][title],   talks[0][slide_file], …, talks[M][…]
+   *
+   * Field name conversions:
+   *   federalCode   → federal_code
+   *   minicurriculo → bio
+   *   titulo        → title
+   *   descricao     → description
+   *   turno         → shift
+   *   tipo          → kind
+   *   tema (slug)   → talk_subject_id  (nullable FK)
+   *   slideFile     → slide_file
+   *   slideUrl      → slide_url
    */
   private mapSpeakerPayload(payload: Record<string, unknown>): Record<string, unknown> {
+    const speakers = (payload['speakers'] as Array<Record<string, unknown>>) ?? [];
+    const talks = (payload['talks'] as Array<Record<string, unknown>>) ?? [];
+
     return {
-      ...this.mapPeoplePayload(payload),
-      title: payload['title'] ?? null,
-      description: payload['description'] ?? null,
-      shift: payload['shift'] ?? null,
-      kind: payload['kind'] ?? null,
-      talk_subject_id: this.toNullableNumber(
-        payload['talkSubjectId'] ?? payload['talkSubject'] ?? payload['subject'] ?? null,
-      ),
-      slide_file: payload['slideFile'] ?? payload['slide_file'] ?? null,
-      slide_url: payload['slideUrl'] ?? payload['slide_url'] ?? null,
+      speakers: speakers.map((s) => ({
+        name: s['name'] ?? null,
+        email: s['email'] ?? null,
+        federal_code: s['federalCode'] ?? null,
+        phone: s['phone'] ?? null,
+        photo: s['photo'] ?? null,
+        bio: s['minicurriculo'] ?? null,
+        site: s['site'] ?? null,
+      })),
+      talks: talks.map((t) => ({
+        title: t['titulo'] ?? null,
+        description: t['descricao'] ?? null,
+        shift: t['turno'] ?? null,
+        kind: t['tipo'] ?? null,
+        // tema is a frontend slug; talk_subject_id is a nullable FK — send null
+        // until a /talk-subjects endpoint is integrated and IDs are stored in the form
+        talk_subject_id: t['tema'] ?? null,
+        slide_file: t['slideFile'] ?? null,
+        slide_url: t['slideUrl'] ?? null,
+      })),
     };
   }
+
+  // /**
+  //  * Converts the frontend turno option value to the backend shift code.
+  //  *
+  //  * Frontend TURNOS values → Laravel shift enum:
+  //  *   'manha' → 'M'
+  //  *   'tarde' → 'T'
+  //  *   'M'/'T' pass through (future-proofing if values are updated in form-options)
+  //  */
+  // private mapTurno(turno: string): string | null {
+  //   const map: Record<string, string> = { manha: 'M', tarde: 'T', M: 'M', T: 'T' };
+  //   return map[turno] ?? null;
+  // }
+  //
+  // /**
+  //  * Converts the frontend tipo option value to the backend kind code.
+  //  *
+  //  * Frontend TIPOS values → Laravel kind enum:
+  //  *   'palestra' → 'P'
+  //  *   'oficina'  → 'O'
+  //  *   'P'/'O' pass through (future-proofing)
+  //  */
+  // private mapTipo(tipo: string): string | null {
+  //   const map: Record<string, string> = { palestra: 'P', oficina: 'O', P: 'P', O: 'O' };
+  //   return map[tipo] ?? null;
+  // }
 
   /**
    * Retrieves the current edition identifier from localStorage.
@@ -492,18 +539,24 @@ export class SubscriptionService {
   }
 
   /**
-   * Determines whether the payload contains any File objects.
+   * Determines whether the payload contains any File objects at any depth.
    *
    * Used to decide whether the request should be encoded as
    * JSON or multipart/form-data.
    *
-   * Note:
-   * This version checks only first-level values.
-   * If your forms place File objects inside nested objects or arrays,
-   * this method should become recursive.
+   * Recursively scans nested objects and arrays so that File instances
+   * inside speakers[*].photo or talks[*].slide_file are correctly detected.
    */
   private hasFiles(payload: Record<string, unknown>): boolean {
-    return Object.values(payload).some((v) => v instanceof File);
+    const scan = (value: unknown): boolean => {
+      if (value instanceof File) return true;
+      if (Array.isArray(value)) return value.some(scan);
+      if (value !== null && typeof value === 'object') {
+        return Object.values(value as Record<string, unknown>).some(scan);
+      }
+      return false;
+    };
+    return scan(payload);
   }
 
   /**
@@ -558,7 +611,7 @@ export class SubscriptionService {
     if (value instanceof File) {
       form.append(key, value, value.name);
     } else if (Array.isArray(value)) {
-      value.forEach((item) => this.appendValue(form, `${key}[]`, item));
+      value.forEach((item, index) => this.appendValue(form, `${key}[${index}]`, item));
     } else if (value !== null && typeof value === 'object') {
       this.toFormData(value as Record<string, unknown>, form, key);
     } else if (typeof value === 'boolean') {
