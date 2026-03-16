@@ -35,3 +35,5 @@ export const appConfig: ApplicationConfig = {
     }),
   ],
 };
+
+export const SNACK_DURATION = 5_000;

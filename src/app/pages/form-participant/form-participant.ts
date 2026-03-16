@@ -6,6 +6,7 @@ import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { debounceTime, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -22,6 +23,7 @@ import {
 } from '../../forms/form-field/form-field';
 import { DISTROS, SelectOption, STATES_BR, STUDENT_OPTIONS } from '../../constants/form-options';
 import { STORAGE_KEYS } from '../../constants/storage-keys';
+import { SNACK_DURATION } from '../../app.config';
 
 @Component({
   selector: 'app-form-participant',
@@ -66,6 +68,7 @@ export class FormParticipant implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly router: Router,
+    private readonly snackBar: MatSnackBar,
     private readonly storage: FormStorageService,
     private readonly translate: TranslateService,
   ) {}
@@ -148,7 +151,16 @@ export class FormParticipant implements OnInit, OnDestroy {
     event.preventDefault();
     this.submitted.set(true);
     this.form.markAllAsTouched();
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.snackBar.open(
+        this.translate.instant('formErrors.summary'),
+        this.translate.instant('common.ok'),
+        {
+          duration: SNACK_DURATION,
+        },
+      );
+      return;
+    }
 
     this.router.navigate(['/subscribe/participant/review'], {
       state: { payload: this.form.getRawValue() },

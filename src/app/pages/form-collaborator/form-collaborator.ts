@@ -7,6 +7,7 @@ import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/mat
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { debounceTime, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -29,6 +30,7 @@ import {
   STUDENT_OPTIONS,
 } from '../../constants/form-options';
 import { STORAGE_KEYS } from '../../constants/storage-keys';
+import { SNACK_DURATION } from '../../app.config';
 
 @Component({
   selector: 'app-form-collaborator',
@@ -77,6 +79,7 @@ export class FormCollaborator implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly router: Router,
+    private readonly snackBar: MatSnackBar,
     private readonly storage: FormStorageService,
     private readonly translate: TranslateService,
   ) {}
@@ -176,7 +179,16 @@ export class FormCollaborator implements OnInit, OnDestroy {
     this.submittedSig.set(true);
     this.form.markAllAsTouched();
 
-    if (this.form.invalid || !this.selectedShifts.length || !this.selectedAreas.length) return;
+    if (this.form.invalid || !this.selectedShifts.length || !this.selectedAreas.length) {
+      this.snackBar.open(
+        this.translate.instant('formErrors.summary'),
+        this.translate.instant('common.ok'),
+        {
+          duration: SNACK_DURATION,
+        },
+      );
+      return;
+    }
 
     this.router.navigate(['/subscribe/collaborator/review'], {
       state: {

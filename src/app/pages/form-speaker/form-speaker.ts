@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,6 +15,7 @@ import { FILE_PREFIXES, STORAGE_KEYS } from '../../constants/storage-keys';
 import { SpeakerCard } from './speaker-card/speaker-card';
 import { TalkCard } from './talk-card/talk-card';
 import { NavItem, SpeakerFormNav } from './speaker-form-nav/speaker-form-nav';
+import { SNACK_DURATION } from '../../app.config';
 
 // ── Serialisation helpers ─────────────────────────────────────────────────────
 
@@ -72,6 +74,7 @@ export class FormSpeaker implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly router: Router,
+    private readonly snackBar: MatSnackBar,
     private readonly storage: FormStorageService,
     private readonly translate: TranslateService,
   ) {}
@@ -205,7 +208,16 @@ export class FormSpeaker implements OnInit, OnDestroy {
     this.form.markAllAsTouched();
 
     const photosValid = this.speakerPhotos().every((p) => p !== null);
-    if (this.form.invalid || !photosValid) return;
+    if (this.form.invalid || !photosValid) {
+      this.snackBar.open(
+        this.translate.instant('formErrors.summaryWithBlocks'),
+        this.translate.instant('common.ok'),
+        {
+          duration: SNACK_DURATION,
+        },
+      );
+      return;
+    }
 
     this.router.navigate(['/subscribe/speaker/review'], {
       state: {
@@ -214,7 +226,6 @@ export class FormSpeaker implements OnInit, OnDestroy {
             ...s,
             photo: this.speakerPhotos()[i],
           })),
-          // temaLabel removed - the builder resolves it via TEMAS lookup
           talks: this.talksArray.getRawValue().map((t, i) => ({
             ...t,
             slideFile: this.slideFiles()[i],

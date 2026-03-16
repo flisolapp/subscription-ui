@@ -21,6 +21,7 @@ import {
   buildSpeakerSections,
   TranslateFn,
 } from './review-sections.builder';
+import { SNACK_DURATION } from '../../app.config';
 
 // ── Public interfaces (consumed by builder) ───────────────────────────────────
 
@@ -57,8 +58,6 @@ const FORM_CONFIG: Record<SubscriptionType, { titleKey: string; backRoute: strin
     backRoute: '/subscribe/collaborator',
   },
 };
-
-const SNACK_DURATION = 5_000;
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -241,11 +240,8 @@ export class FormReview implements OnInit {
 
   // ── Private ───────────────────────────────────────────────────────────────
 
-  private clearFormStorage(): void {
-    // this.formStorage.clearAll();
-    console.debug(
-      '[FormReview] clearFormStorage() called - uncomment this.formStorage.clearAll() when ready',
-    );
+  private async clearFormStorage(): Promise<void> {
+    await this.formStorage.clearAll();
   }
 
   private handleSubmitError(err: unknown): void {

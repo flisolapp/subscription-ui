@@ -71,37 +71,6 @@
       "confirm": "Delete and start new"
     }
   },
-  "search": {
-    "title": "Certificate Verifier",
-    "description": "Verify easily the validity of a certificate emitted by FLISoL. Centered. Fast.",
-    "termSearchPlace": "Enter your email or code",
-    "notFound": "No results found.",
-    "oneFound": "certificate found.",
-    "manyFound": "certificates found.",
-    "repeatSearch": "Do another search.",
-    "edition": "Edition",
-    "unit": "Unit",
-    "name": "Name",
-    "enjoyedAs": "Enjoyed as",
-    "code": "Code",
-    "download": "Download",
-    "preview": "Preview",
-    "role": {
-      "organizer": "Organizer",
-      "collaborator": "Collaborator",
-      "speaker": "Speaker",
-      "participant": "Participant"
-    },
-    "confirmation": {
-      "title": "Confirmation",
-      "description": "Are you sure that you want to proceed?"
-    },
-    "error": {
-      "-1": "The term is invalid to search. It is required.",
-      "-2": "The term is invalid to search.",
-      "-3": "The term is invalid to search. Must be an e-mail or certificate's code."
-    }
-  },
   "formParticipant": {
     "title": "Subscribe",
     "description1": "Secure your spot at the biggest free software event.",
@@ -299,5 +268,9 @@
       "speaker": "Talk submission",
       "collaborator": "I want to collaborate"
     }
+  },
+  "formErrors": {
+    "summary": "Review the required fields and fix the errors to continue.",
+    "summaryWithBlocks": "Review the fields, complete the sections, and fix the errors to continue."
   }
 }

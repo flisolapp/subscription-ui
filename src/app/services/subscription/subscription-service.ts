@@ -9,7 +9,6 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, filter, lastValueFrom, map, Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { STORAGE_KEYS } from '../../constants/storage-keys';
-import { FormStorageService } from '../form-storage/form-storage-service';
 
 // ── Response shapes ───────────────────────────────────────────────────────────
 
@@ -62,9 +61,6 @@ export class SubscriptionService {
   /** Angular HTTP client used to communicate with the backend API. */
   private readonly http = inject(HttpClient);
 
-  /** Service responsible for persisting and clearing form draft data. */
-  private readonly formStorage = inject(FormStorageService);
-
   /** Base API URL defined in the Angular environment configuration. */
   private readonly baseUrl = environment.apiUrl;
 
@@ -102,7 +98,6 @@ export class SubscriptionService {
       : this.postJson(url, finalPayload);
 
     const response = await lastValueFrom(request$.pipe(catchError(this.handleError)));
-    await this.formStorage.clearAll();
 
     return response;
   }
@@ -149,7 +144,6 @@ export class SubscriptionService {
             return { percent, done: false };
           }
           case HttpEventType.Response:
-            void this.formStorage.clearAll();
             return { percent: 100, done: true, response: event.body ?? undefined };
           default:
             return { percent: null, done: false };
@@ -207,7 +201,6 @@ export class SubscriptionService {
     console.groupEnd();
 
     await new Promise((r) => setTimeout(r, delayMs));
-    await this.formStorage.clearAll();
 
     return {
       message: '[DRY RUN] Submission simulated successfully.',

@@ -71,37 +71,6 @@
       "confirm": "Eliminar y comenzar nueva"
     }
   },
-  "search": {
-    "title": "Validador de Certificado",
-    "description": "Valide de forma centralizada, fácil y rápido el certificado emitido por FLISoL.",
-    "termSearchPlace": "Introduce tu email o código",
-    "notFound": "No se han encontrado resultados.",
-    "oneFound": "certificado encontrado.",
-    "manyFound": "certificados encontrados.",
-    "repeatSearch": "Haz otra búsqueda.",
-    "edition": "Edición",
-    "unit": "Unidad",
-    "name": "Nombre",
-    "enjoyedAs": "Fue como",
-    "code": "Código",
-    "download": "Descargar",
-    "preview": "Previa",
-    "role": {
-      "organizer": "Organizador",
-      "collaborator": "Colaborador",
-      "speaker": "Orador",
-      "participant": "Participante"
-    },
-    "confirmation": {
-      "title": "Confirmación",
-      "description": "¿Estás seguro de que quieres continuar?"
-    },
-    "error": {
-      "-1": "El término no es válido para buscar. Es requerido.",
-      "-2": "El término no es válido para buscar.",
-      "-3": "El término no es válido para buscar. Debe ser un correo electrónico o un código de certificado."
-    }
-  },
   "formParticipant": {
     "title": "Suscribirse",
     "description1": "Asegura tu lugar en el mayor evento de software libre.",
@@ -299,5 +268,9 @@
       "speaker": "Envío de charlas",
       "collaborator": "Quiero colaborar"
     }
+  },
+  "formErrors": {
+    "summary": "Revisa los campos obligatorios y corrige los errores para continuar.",
+    "summaryWithBlocks": "Revisa los campos, completa los bloques y corrige los errores para continuar."
   }
 }
