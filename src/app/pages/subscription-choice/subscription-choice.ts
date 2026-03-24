@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { PageStructure } from '../../components/page-structure/page-structure';
 import { TranslatePipe } from '@ngx-translate/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -12,8 +12,6 @@ import {
   ResumeSubscriptionDialogData,
 } from './resume-subscription-dialog/resume-subscription-dialog';
 import { ConfirmClearDialog } from './confirm-clear-dialog/confirm-clear-dialog';
-import { EditionService } from '../../services/edition/edition-service';
-import { STORAGE_KEYS } from '../../constants/storage-keys';
 
 @Component({
   selector: 'app-subscription-choice',
@@ -23,8 +21,6 @@ import { STORAGE_KEYS } from '../../constants/storage-keys';
   styleUrl: './subscription-choice.scss',
 })
 export class SubscriptionChoice implements OnInit {
-  private editionService = inject(EditionService);
-
   public cards = [
     {
       type: 'participant' as const,
@@ -58,16 +54,6 @@ export class SubscriptionChoice implements OnInit {
 
   public ngOnInit(): void {
     this.checkForSavedSubscription();
-
-    this.editionService.getCurrentEdition().subscribe({
-      next: (edition) => {
-        console.log('Current edition:', edition);
-        localStorage.setItem(STORAGE_KEYS.EDITION, JSON.stringify(edition));
-      },
-      error: (error) => {
-        console.error('Failed to fetch current edition:', error);
-      },
-    });
   }
 
   public onSelect(path: string): void {

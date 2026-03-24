@@ -6,10 +6,19 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, filter, lastValueFrom, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  filter,
+  from,
+  lastValueFrom,
+  map,
+  Observable,
+  switchMap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { STORAGE_KEYS } from '../../constants/storage-keys';
 import { ErrorReportingService } from '../error-reporting/error-reporting-service';
+import { EditionService } from '../edition/edition-service';
 
 // ── Response shapes ───────────────────────────────────────────────────────────
 
@@ -68,6 +77,9 @@ export class SubscriptionService {
   /** Centralised error reporting — owns all Sentry interactions. */
   private readonly errorReporting = inject(ErrorReportingService);
 
+  /** Retrieve edition to be sent when subscribe **/
+  private readonly edition = inject(EditionService);
+
   // ── 1. submit() ─────────────────────────────────────────────────────────────
   /**
    * Fire-and-forget POST.
@@ -78,7 +90,7 @@ export class SubscriptionService {
    * Behaviour
    * ─────────
    * • Normalises frontend field names to backend field names.
-   * • Automatically injects `edition_id` from localStorage.
+   * • Automatically injects `edition_id` from localStorage (fetches from API if missing).
    * • Detects whether the payload contains File objects.
    * • Uses JSON when no files exist.
    * • Uses multipart/form-data when files are present.
@@ -93,8 +105,8 @@ export class SubscriptionService {
     // First convert the frontend payload to the backend contract
     const normalizedPayload = this.normalizePayloadByType(type, payload);
 
-    // Then inject edition_id from localStorage
-    const finalPayload = this.withEdition(normalizedPayload);
+    // Then inject edition_id — fetches from API automatically if not cached
+    const finalPayload = await this.withEdition(normalizedPayload);
 
     // Decide which encoding to use depending on whether the payload contains files
     const request$ = this.hasFiles(finalPayload)
@@ -120,7 +132,7 @@ export class SubscriptionService {
    * payload does not contain files.
    *
    * The current edition_id is automatically injected from localStorage
-   * after the payload is normalized to the backend contract.
+   * (fetched from the API if missing) after the payload is normalized.
    *
    * Persisted form data is cleared when the final response event is received.
    */
@@ -130,28 +142,31 @@ export class SubscriptionService {
     // First convert the frontend payload to the backend contract
     const normalizedPayload = this.normalizePayloadByType(type, payload);
 
-    // Then inject edition_id from localStorage
-    const finalPayload = this.withEdition(normalizedPayload);
+    // withEdition() is async (may fetch from API), so we lift the Promise into
+    // an Observable and flatMap into the upload stream
+    return from(this.withEdition(normalizedPayload)).pipe(
+      switchMap((finalPayload) => {
+        // Create a low-level HttpRequest so Angular exposes upload progress events
+        const req = new HttpRequest<FormData>('POST', url, this.toFormData(finalPayload), {
+          reportProgress: true,
+        });
 
-    // Create a low-level HttpRequest so Angular exposes upload progress events
-    const req = new HttpRequest<FormData>('POST', url, this.toFormData(finalPayload), {
-      reportProgress: true,
-    });
-
-    return this.http.request<SubscriptionResponse>(req).pipe(
-      catchError(this.handleError),
-      filter((event): event is HttpEvent<SubscriptionResponse> => true),
-      map((event): UploadProgress => {
-        switch (event.type) {
-          case HttpEventType.UploadProgress: {
-            const percent = event.total ? Math.round((100 * event.loaded) / event.total) : null;
-            return { percent, done: false };
-          }
-          case HttpEventType.Response:
-            return { percent: 100, done: true, response: event.body ?? undefined };
-          default:
-            return { percent: null, done: false };
-        }
+        return this.http.request<SubscriptionResponse>(req).pipe(
+          catchError(this.handleError),
+          filter((event): event is HttpEvent<SubscriptionResponse> => true),
+          map((event): UploadProgress => {
+            switch (event.type) {
+              case HttpEventType.UploadProgress: {
+                const percent = event.total ? Math.round((100 * event.loaded) / event.total) : null;
+                return { percent, done: false };
+              }
+              case HttpEventType.Response:
+                return { percent: 100, done: true, response: event.body ?? undefined };
+              default:
+                return { percent: null, done: false };
+            }
+          }),
+        );
       }),
     );
   }
@@ -181,7 +196,7 @@ export class SubscriptionService {
 
     // Ensure the debug payload matches real behaviour
     const normalizedPayload = this.normalizePayloadByType(type, payload);
-    const finalPayload = this.withEdition(normalizedPayload);
+    const finalPayload = await this.withEdition(normalizedPayload);
 
     const usesMultipart = this.hasFiles(finalPayload);
     const body = usesMultipart ? this.toFormData(finalPayload) : finalPayload;
@@ -349,19 +364,19 @@ export class SubscriptionService {
    *
    * This mapper preserves both arrays in full and renames fields to the
    * backend convention. Laravel receives them as:
-   *   speakers[0][name], speakers[0][photo], …, speakers[N][…]
-   *   talks[0][title],   talks[0][slide_file], …, talks[M][…]
+   *   speakers[0][name], speakers[0][photo], ..., speakers[N][...]
+   *   talks[0][title],   talks[0][slide_file], ..., talks[M][...]
    *
    * Field name conversions:
-   *   federalCode   → federal_code
-   *   minicurriculo → bio
-   *   titulo        → title
-   *   descricao     → description
-   *   turno         → shift
-   *   tipo          → kind
-   *   tema (slug)   → talk_subject_id  (nullable FK)
-   *   slideFile     → slide_file
-   *   slideUrl      → slide_url
+   *   federalCode   -> federal_code
+   *   minicurriculo -> bio
+   *   titulo        -> title
+   *   descricao     -> description
+   *   turno         -> shift
+   *   tipo          -> kind
+   *   tema (slug)   -> talk_subject_id  (nullable FK)
+   *   slideFile     -> slide_file
+   *   slideUrl      -> slide_url
    */
   private mapSpeakerPayload(payload: Record<string, unknown>): Record<string, unknown> {
     const speakers = (payload['speakers'] as Array<Record<string, unknown>>) ?? [];
@@ -394,9 +409,9 @@ export class SubscriptionService {
   // /**
   //  * Converts the frontend turno option value to the backend shift code.
   //  *
-  //  * Frontend TURNOS values → Laravel shift enum:
-  //  *   'manha' → 'M'
-  //  *   'tarde' → 'T'
+  //  * Frontend TURNOS values -> Laravel shift enum:
+  //  *   'manha' -> 'M'
+  //  *   'tarde' -> 'T'
   //  *   'M'/'T' pass through (future-proofing if values are updated in form-options)
   //  */
   // private mapTurno(turno: string): string | null {
@@ -407,9 +422,9 @@ export class SubscriptionService {
   // /**
   //  * Converts the frontend tipo option value to the backend kind code.
   //  *
-  //  * Frontend TIPOS values → Laravel kind enum:
-  //  *   'palestra' → 'P'
-  //  *   'oficina'  → 'O'
+  //  * Frontend TIPOS values -> Laravel kind enum:
+  //  *   'palestra' -> 'P'
+  //  *   'oficina'  -> 'O'
   //  *   'P'/'O' pass through (future-proofing)
   //  */
   // private mapTipo(tipo: string): string | null {
@@ -418,43 +433,16 @@ export class SubscriptionService {
   // }
 
   /**
-   * Retrieves the current edition identifier from localStorage.
-   *
-   * Expected storage format:
-   *   localStorage[STORAGE_KEYS.EDITION] = JSON.stringify({ id: number, ... })
-   *
-   * Returns:
-   *   number → valid edition id
-   *   null   → if the value is missing or malformed
-   */
-  private getEditionId(): number | null {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.EDITION);
-      if (!raw) {
-        return null;
-      }
-
-      const parsed = JSON.parse(raw) as { id?: unknown } | null;
-      const id = parsed?.id;
-
-      return typeof id === 'number' ? id : null;
-    } catch {
-      return null;
-    }
-  }
-
-  /**
    * Returns a new payload enriched with `edition_id`.
    *
+   * Async because EditionService.getOrFetchEditionId() may trigger an API
+   * call when the edition is not yet cached in localStorage.
    * The original payload object is never mutated.
-   *
-   * If the caller already provided edition_id, the value from localStorage
-   * still wins so the current selected edition remains authoritative.
    */
-  private withEdition(payload: Record<string, unknown>): Record<string, unknown> {
+  private async withEdition(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
     return {
       ...payload,
-      edition_id: this.getEditionId(),
+      edition_id: await this.edition.getOrFetchEditionId(),
     };
   }
 
@@ -462,20 +450,10 @@ export class SubscriptionService {
    * Converts form-like values into boolean or null.
    *
    * Accepted truthy values:
-   * - true
-   * - 1
-   * - '1'
-   * - 'true'
-   * - 'yes'
-   * - 'on'
+   * - true, 1, '1', 'true', 'yes', 'on'
    *
    * Accepted falsy values:
-   * - false
-   * - 0
-   * - '0'
-   * - 'false'
-   * - 'no'
-   * - 'off'
+   * - false, 0, '0', 'false', 'no', 'off'
    */
   private toNullableBoolean(value: unknown): boolean | null {
     if (value === null || value === undefined || value === '') {
@@ -584,7 +562,7 @@ export class SubscriptionService {
    * File             → binary blob with original filename
    * boolean          → '1' / '0'  (PHP/Laravel truthy convention)
    * null | undefined → ''         (Laravel reads as null via ->nullable())
-   * Array            → key[]      (Laravel array convention)
+   * Array            → key[N]     (indexed Laravel array convention)
    * Plain object     → key[sub]   (bracket-notation recursion)
    * Everything else  → String()
    */

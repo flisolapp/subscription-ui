@@ -67,7 +67,7 @@ export class Toolbar implements OnInit {
     }
   }
 
-  public throwTestError(): void {
-    throw new Error('Sentry Test Error');
-  }
+  // public throwTestError(): void {
+  //   throw new Error('Sentry Test Error');
+  // }
 }
