@@ -158,7 +158,7 @@
       "photoDownload": "Download photo",
       "photoRemove": "Remove photo",
       "photoError": "Please upload a photo.",
-      "photoFormat": "PNG or JPG",
+      "photoFormat": "PNG, JPG or WEBP",
       "name": "Name",
       "federalCode": "Federal Code",
       "federalCodeHint": "Brazilian Individual Taxpayer Registry",
@@ -217,12 +217,18 @@
       "outro": "Other"
     }
   },
+  "fileSizeError": {
+    "photo": "Photo \"{{ name }}\" exceeds the {{ max }} limit. Please select a smaller image.",
+    "slide": "File \"{{ name }}\" exceeds the {{ max }} limit. Please select a smaller file."
+  },
   "formReview": {
     "confirmationLabel": "Confirmation",
     "reviewHint": "Review your data before confirming submission.",
     "speakerPhotoAlt": "Speaker photo",
     "backAndEdit": "Back and edit",
     "confirmAndSend": "Confirm and send",
+    "stepRegistering": "Registering subscription…",
+    "stepUploading": "Uploading files…",
     "fields": {
       "name": "Name",
       "federalCode": "Federal Code",

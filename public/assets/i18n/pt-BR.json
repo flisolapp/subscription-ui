@@ -158,7 +158,7 @@
       "photoDownload": "Baixar foto",
       "photoRemove": "Remover foto",
       "photoError": "Envie uma foto.",
-      "photoFormat": "PNG ou JPG",
+      "photoFormat": "PNG, JPG ou WEBP",
       "name": "Nome",
       "federalCode": "CPF",
       "federalCodeHint": "Cadastro de Pessoa Física",
@@ -217,12 +217,18 @@
       "outro": "Outro"
     }
   },
+  "fileSizeError": {
+    "photo": "A foto \"{{ name }}\" excede o limite de {{ max }}. Selecione uma imagem menor.",
+    "slide": "O arquivo \"{{ name }}\" excede o limite de {{ max }}. Selecione um arquivo menor."
+  },
   "formReview": {
     "confirmationLabel": "Confirmação",
     "reviewHint": "Revise seus dados antes de confirmar o envio.",
     "speakerPhotoAlt": "Foto do palestrante",
     "backAndEdit": "Voltar e editar",
     "confirmAndSend": "Confirmar e enviar",
+    "stepRegistering": "Registrando inscrição…",
+    "stepUploading": "Enviando arquivos…",
     "fields": {
       "name": "Nome",
       "federalCode": "CPF",

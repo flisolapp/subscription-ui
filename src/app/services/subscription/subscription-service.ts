@@ -25,10 +25,14 @@ import { EditionService } from '../edition/edition-service';
 export interface SubscriptionResponse {
   message: string;
   data: {
-    id: number;
+    id?: number;
     type: FormType;
     status: SubscriptionStatus;
     created_at: string;
+    /** Speaker-specific: IDs of created People records, returned for file upload step. */
+    speakers?: { id: number }[];
+    /** Speaker-specific: IDs of created Talk records, returned for file upload step. */
+    talks?: { id: number }[];
   };
 }
 
@@ -40,6 +44,21 @@ export interface ValidationErrorResponse {
 /** Emitted continuously by submitWithProgress(). */
 export interface UploadProgress {
   /** 0–100. null while the response is being parsed after upload completes. */
+  percent: number | null;
+  done: boolean;
+  response?: SubscriptionResponse;
+}
+
+/**
+ * Progress events emitted during a two-step speaker submission.
+ * step: which phase of the submission is currently running.
+ * percent: 0-100 during file uploads; null during the JSON registration step.
+ */
+export interface SpeakerTwoStepProgress {
+  step: 'registering' | 'uploading';
+  /** Upload index (1-based) out of total, only set when step = 'uploading'. */
+  fileIndex?: number;
+  fileTotal?: number;
   percent: number | null;
   done: boolean;
   response?: SubscriptionResponse;
@@ -94,7 +113,6 @@ export class SubscriptionService {
    * • Detects whether the payload contains File objects.
    * • Uses JSON when no files exist.
    * • Uses multipart/form-data when files are present.
-   * • Clears persisted form data after a successful submission.
    *
    * This method returns a Promise because most callers simply need the
    * final response and do not require streaming progress updates.
@@ -102,20 +120,14 @@ export class SubscriptionService {
   async submit(type: FormType, payload: Record<string, unknown>): Promise<SubscriptionResponse> {
     const url = this.url(type);
 
-    // First convert the frontend payload to the backend contract
     const normalizedPayload = this.normalizePayloadByType(type, payload);
-
-    // Then inject edition_id — fetches from API automatically if not cached
     const finalPayload = await this.withEdition(normalizedPayload);
 
-    // Decide which encoding to use depending on whether the payload contains files
     const request$ = this.hasFiles(finalPayload)
       ? this.postMultipart(url, finalPayload)
       : this.postJson(url, finalPayload);
 
-    const response = await lastValueFrom(request$.pipe(catchError(this.handleError)));
-
-    return response;
+    return lastValueFrom(request$.pipe(catchError(this.handleError)));
   }
 
   // ── 2. submitWithProgress() ─────────────────────────────────────────────────
@@ -125,28 +137,15 @@ export class SubscriptionService {
    * Returns an Observable stream emitting UploadProgress objects so
    * callers can drive a progress bar during file uploads.
    *
-   * Important notes
-   * ───────────────
-   * Browsers only emit upload progress events for FormData requests.
-   * Therefore this method always uses multipart/form-data even if the
-   * payload does not contain files.
-   *
-   * The current edition_id is automatically injected from localStorage
-   * (fetched from the API if missing) after the payload is normalized.
-   *
-   * Persisted form data is cleared when the final response event is received.
+   * Used for participant and collaborator submissions (no separate file step).
    */
   submitWithProgress(type: FormType, payload: Record<string, unknown>): Observable<UploadProgress> {
     const url = this.url(type);
 
-    // First convert the frontend payload to the backend contract
     const normalizedPayload = this.normalizePayloadByType(type, payload);
 
-    // withEdition() is async (may fetch from API), so we lift the Promise into
-    // an Observable and flatMap into the upload stream
     return from(this.withEdition(normalizedPayload)).pipe(
       switchMap((finalPayload) => {
-        // Create a low-level HttpRequest so Angular exposes upload progress events
         const req = new HttpRequest<FormData>('POST', url, this.toFormData(finalPayload), {
           reportProgress: true,
         });
@@ -171,21 +170,124 @@ export class SubscriptionService {
     );
   }
 
-  // ── 3. submitDry() ──────────────────────────────────────────────────────────
+  // ── 3. submitSpeakerTwoStep() ────────────────────────────────────────────────
+  /**
+   * Two-step speaker submission.
+   *
+   * Step 1 — JSON registration:
+   *   Posts the speaker and talk data as JSON (no files). The backend creates
+   *   People and Talk records and returns their IDs.
+   *
+   * Step 2 — File uploads:
+   *   Sends each speaker photo and talk slide as a separate multipart request
+   *   to the dedicated upload endpoints, using the IDs returned in step 1.
+   *
+   * The caller receives a stream of SpeakerTwoStepProgress events that it can
+   * use to drive a progress bar and status label in the UI.
+   *
+   * File-size limits enforced on the frontend before this method is called:
+   *   Photo  → max 5 MB  (validated in SpeakerCard)
+   *   Slide  → max 10 MB (validated in TalkCard)
+   *
+   * @param payload  Raw frontend payload containing File objects in
+   *                 speakers[*].photo and talks[*].slideFile.
+   */
+  async submitSpeakerTwoStep(
+    payload: Record<string, unknown>,
+    onProgress: (progress: SpeakerTwoStepProgress) => void,
+  ): Promise<SubscriptionResponse> {
+    // ── Step 1: JSON registration (no files) ─────────────────────────────────
+
+    onProgress({ step: 'registering', percent: null, done: false });
+
+    const normalizedPayload = this.mapSpeakerPayload(payload);
+    const jsonPayload = await this.withEdition(this.stripFiles(normalizedPayload));
+
+    const registrationResponse = await lastValueFrom(
+      this.postJson(this.url('speaker'), jsonPayload).pipe(catchError(this.handleError)),
+    );
+
+    const speakerIds = registrationResponse.data.speakers?.map((s) => s.id) ?? [];
+    const talkIds = registrationResponse.data.talks?.map((t) => t.id) ?? [];
+
+    // ── Step 2: File uploads ─────────────────────────────────────────────────
+
+    const speakers = (payload['speakers'] as Array<Record<string, unknown>>) ?? [];
+    const talks = (payload['talks'] as Array<Record<string, unknown>>) ?? [];
+
+    const photos: { speakerId: number; file: File }[] = speakers
+      .map((s, i) => ({ speakerId: speakerIds[i], file: s['photo'] as File | null }))
+      .filter(
+        (item): item is { speakerId: number; file: File } =>
+          item.file instanceof File && !!item.speakerId,
+      );
+
+    const slides: { talkId: number; file: File }[] = talks
+      .map((t, i) => ({ talkId: talkIds[i], file: t['slideFile'] as File | null }))
+      .filter(
+        (item): item is { talkId: number; file: File } =>
+          item.file instanceof File && !!item.talkId,
+      );
+
+    const fileTotal = photos.length + slides.length;
+    let fileIndex = 0;
+
+    for (const { speakerId, file } of photos) {
+      fileIndex++;
+      onProgress({
+        step: 'uploading',
+        fileIndex,
+        fileTotal,
+        percent: Math.round(((fileIndex - 1) / fileTotal) * 100),
+        done: false,
+      });
+      await this.uploadSpeakerPhoto(speakerId, file);
+    }
+
+    for (const { talkId, file } of slides) {
+      fileIndex++;
+      onProgress({
+        step: 'uploading',
+        fileIndex,
+        fileTotal,
+        percent: Math.round(((fileIndex - 1) / fileTotal) * 100),
+        done: false,
+      });
+      await this.uploadTalkSlide(talkId, file);
+    }
+
+    onProgress({ step: 'uploading', percent: 100, done: true, response: registrationResponse });
+
+    return registrationResponse;
+  }
+
+  // ── 4. uploadSpeakerPhoto() ─────────────────────────────────────────────────
+  /**
+   * POSTs a single speaker photo to the dedicated upload endpoint.
+   * Called by submitSpeakerTwoStep() after the speaker IDs are known.
+   */
+  async uploadSpeakerPhoto(speakerId: number, photo: File): Promise<void> {
+    const url = `${this.baseUrl}/subscriptions/speakers/${speakerId}/photo`;
+    const form = new FormData();
+    form.append('photo', photo, photo.name);
+    await lastValueFrom(this.http.post(url, form).pipe(catchError(this.handleError)));
+  }
+
+  // ── 5. uploadTalkSlide() ────────────────────────────────────────────────────
+  /**
+   * POSTs a single talk slide to the dedicated upload endpoint.
+   * Called by submitSpeakerTwoStep() after the talk IDs are known.
+   */
+  async uploadTalkSlide(talkId: number, slide: File): Promise<void> {
+    const url = `${this.baseUrl}/subscriptions/talks/${talkId}/slide`;
+    const form = new FormData();
+    form.append('slide_file', slide, slide.name);
+    await lastValueFrom(this.http.post(url, form).pipe(catchError(this.handleError)));
+  }
+
+  // ── 6. submitDry() ──────────────────────────────────────────────────────────
   /**
    * Development / debug helper — NO network request is made.
-   *
-   * This method simulates the submission process without contacting the API.
-   * It serialises the payload exactly like the real submission methods,
-   * logs detailed request information to the console, and returns a
-   * mock response after a configurable delay.
-   *
-   * Useful when:
-   * • debugging payload structures
-   * • testing UI behaviour
-   * • verifying file uploads before backend integration
-   *
-   * ⚠ Remove or disable calls to this method in production builds.
    */
   async submitDry(
     type: FormType,
@@ -194,7 +296,6 @@ export class SubscriptionService {
   ): Promise<SubscriptionResponse> {
     const url = this.url(type);
 
-    // Ensure the debug payload matches real behaviour
     const normalizedPayload = this.normalizePayloadByType(type, payload);
     const finalPayload = await this.withEdition(normalizedPayload);
 
@@ -234,20 +335,10 @@ export class SubscriptionService {
 
   // ── Private helpers ─────────────────────────────────────────────────────────
 
-  /**
-   * Builds the full backend URL for the given subscription type.
-   */
   private url(type: FormType): string {
     return `${this.baseUrl}${ENDPOINTS[type]}`;
   }
 
-  /**
-   * Routes the payload through the correct mapper according to the
-   * subscription type.
-   *
-   * This keeps the external API of the service simple: the component can
-   * pass its frontend form model, and the service adapts it to Laravel.
-   */
   private normalizePayloadByType(
     type: FormType,
     payload: Record<string, unknown>,
@@ -255,53 +346,25 @@ export class SubscriptionService {
     switch (type) {
       case 'participant':
         return this.mapParticipantPayload(payload);
-
       case 'collaborator':
         return this.mapCollaboratorPayload(payload);
-
       case 'speaker':
         return this.mapSpeakerPayload(payload);
-
       default:
         return payload;
     }
   }
 
-  /**
-   * Maps the shared frontend people fields to the backend field names
-   * expected by PeopleRequest.
-   *
-   * Backend fields covered here:
-   * - name
-   * - email
-   * - federal_code
-   * - phone
-   * - photo
-   * - bio
-   * - site
-   * - use_free
-   * - distro_id
-   * - student_info_id
-   * - student_place
-   * - student_course
-   * - address_state
-   *
-   * This base mapper is reused by participant, collaborator and speaker.
-   */
   private mapPeoplePayload(payload: Record<string, unknown>): Record<string, unknown> {
     return {
       name: payload['name'] ?? null,
       email: payload['email'] ?? null,
       federal_code: payload['federalCode'] ?? payload['federal_code'] ?? null,
       phone: payload['phone'] ?? null,
-
-      // Optional profile fields
       photo: payload['photo'] ?? null,
       bio: payload['bio'] ?? null,
       site: payload['site'] ?? null,
       use_free: this.toNullableBoolean(payload['usesFreeSoftware'] ?? payload['use_free'] ?? null),
-
-      // Optional academic / location fields
       distro_id: this.toNullableNumber(payload['distro'] ?? payload['distro_id'] ?? null),
       student_info_id: this.toNullableNumber(
         payload['isStudent'] ?? payload['student_info_id'] ?? null,
@@ -312,31 +375,10 @@ export class SubscriptionService {
     };
   }
 
-  /**
-   * Maps the participant form payload to the backend contract.
-   *
-   * Participant currently only adds edition_id on top of the shared
-   * PeopleRequest fields, so this mapper simply reuses the people mapper.
-   */
   private mapParticipantPayload(payload: Record<string, unknown>): Record<string, unknown> {
-    return {
-      ...this.mapPeoplePayload(payload),
-    };
+    return { ...this.mapPeoplePayload(payload) };
   }
 
-  /**
-   * Maps the collaborator form payload to the backend contract.
-   *
-   * Extra collaborator fields expected by Laravel:
-   * - areas: number[]
-   * - availabilities: number[]
-   *
-   * Frontend aliases accepted here:
-   * - collaborationAreas -> areas
-   * - areas -> areas
-   * - availabilityShifts -> availabilities
-   * - availabilities -> availabilities
-   */
   private mapCollaboratorPayload(payload: Record<string, unknown>): Record<string, unknown> {
     return {
       ...this.mapPeoplePayload(payload),
@@ -356,27 +398,9 @@ export class SubscriptionService {
   /**
    * Maps the speaker form payload to the backend contract.
    *
-   * The frontend payload has a nested structure supporting multiple speakers
-   * and multiple talks:
-   *
-   *   { speakers: [ { name, federalCode, email, phone, minicurriculo, site, photo } ],
-   *     talks:    [ { titulo, descricao, turno, tipo, tema, slideFile, slideUrl } ] }
-   *
-   * This mapper preserves both arrays in full and renames fields to the
-   * backend convention. Laravel receives them as:
-   *   speakers[0][name], speakers[0][photo], ..., speakers[N][...]
-   *   talks[0][title],   talks[0][slide_file], ..., talks[M][...]
-   *
-   * Field name conversions:
-   *   federalCode   -> federal_code
-   *   minicurriculo -> bio
-   *   titulo        -> title
-   *   descricao     -> description
-   *   turno         -> shift
-   *   tipo          -> kind
-   *   tema (slug)   -> talk_subject_id  (nullable FK)
-   *   slideFile     -> slide_file
-   *   slideUrl      -> slide_url
+   * NOTE: File objects (photo, slide_file) are preserved here so that
+   * submitSpeakerTwoStep() can extract them for the upload step. When
+   * sending the JSON registration request, stripFiles() is applied first.
    */
   private mapSpeakerPayload(payload: Record<string, unknown>): Record<string, unknown> {
     const speakers = (payload['speakers'] as Array<Record<string, unknown>>) ?? [];
@@ -397,8 +421,6 @@ export class SubscriptionService {
         description: t['descricao'] ?? null,
         shift: t['turno'] ?? null,
         kind: t['tipo'] ?? null,
-        // tema is a frontend slug; talk_subject_id is a nullable FK — send null
-        // until a /talk-subjects endpoint is integrated and IDs are stored in the form
         talk_subject_id: t['tema'] ?? null,
         slide_file: t['slideFile'] ?? null,
         slide_url: t['slideUrl'] ?? null,
@@ -406,39 +428,26 @@ export class SubscriptionService {
     };
   }
 
-  // /**
-  //  * Converts the frontend turno option value to the backend shift code.
-  //  *
-  //  * Frontend TURNOS values -> Laravel shift enum:
-  //  *   'manha' -> 'M'
-  //  *   'tarde' -> 'T'
-  //  *   'M'/'T' pass through (future-proofing if values are updated in form-options)
-  //  */
-  // private mapTurno(turno: string): string | null {
-  //   const map: Record<string, string> = { manha: 'M', tarde: 'T', M: 'M', T: 'T' };
-  //   return map[turno] ?? null;
-  // }
-  //
-  // /**
-  //  * Converts the frontend tipo option value to the backend kind code.
-  //  *
-  //  * Frontend TIPOS values -> Laravel kind enum:
-  //  *   'palestra' -> 'P'
-  //  *   'oficina'  -> 'O'
-  //  *   'P'/'O' pass through (future-proofing)
-  //  */
-  // private mapTipo(tipo: string): string | null {
-  //   const map: Record<string, string> = { palestra: 'P', oficina: 'O', P: 'P', O: 'O' };
-  //   return map[tipo] ?? null;
-  // }
-
   /**
-   * Returns a new payload enriched with `edition_id`.
-   *
-   * Async because EditionService.getOrFetchEditionId() may trigger an API
-   * call when the edition is not yet cached in localStorage.
-   * The original payload object is never mutated.
+   * Recursively strips all File objects from a payload, replacing them with null.
+   * Used to produce the JSON-safe body for the first registration step.
    */
+  private stripFiles(payload: unknown): Record<string, unknown> {
+    const strip = (value: unknown): unknown => {
+      if (value instanceof File) return null;
+      if (Array.isArray(value)) return value.map(strip);
+      if (value !== null && typeof value === 'object') {
+        const out: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+          out[k] = strip(v);
+        }
+        return out;
+      }
+      return value;
+    };
+    return strip(payload) as Record<string, unknown>;
+  }
+
   private async withEdition(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
     return {
       ...payload,
@@ -446,20 +455,8 @@ export class SubscriptionService {
     };
   }
 
-  /**
-   * Converts form-like values into boolean or null.
-   *
-   * Accepted truthy values:
-   * - true, 1, '1', 'true', 'yes', 'on'
-   *
-   * Accepted falsy values:
-   * - false, 0, '0', 'false', 'no', 'off'
-   */
   private toNullableBoolean(value: unknown): boolean | null {
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
-
+    if (value === null || value === undefined || value === '') return null;
     if (
       value === true ||
       value === 1 ||
@@ -467,10 +464,8 @@ export class SubscriptionService {
       value === 'true' ||
       value === 'yes' ||
       value === 'on'
-    ) {
+    )
       return true;
-    }
-
     if (
       value === false ||
       value === 0 ||
@@ -478,50 +473,24 @@ export class SubscriptionService {
       value === 'false' ||
       value === 'no' ||
       value === 'off'
-    ) {
+    )
       return false;
-    }
-
     return null;
   }
 
-  /**
-   * Converts a value into number when possible.
-   * Returns null for empty or invalid values.
-   */
   private toNullableNumber(value: unknown): number | null {
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
-
+    if (value === null || value === undefined || value === '') return null;
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : null;
   }
 
-  /**
-   * Converts the provided value into an array of valid numbers.
-   *
-   * Invalid, empty or non-numeric items are discarded.
-   */
   private toNumberArray(value: unknown): number[] {
-    if (!Array.isArray(value)) {
-      return [];
-    }
-
+    if (!Array.isArray(value)) return [];
     return value
       .map((item) => this.toNullableNumber(item))
       .filter((item): item is number => item !== null);
   }
 
-  /**
-   * Determines whether the payload contains any File objects at any depth.
-   *
-   * Used to decide whether the request should be encoded as
-   * JSON or multipart/form-data.
-   *
-   * Recursively scans nested objects and arrays so that File instances
-   * inside speakers[*].photo or talks[*].slide_file are correctly detected.
-   */
   private hasFiles(payload: Record<string, unknown>): boolean {
     const scan = (value: unknown): boolean => {
       if (value instanceof File) return true;
@@ -534,9 +503,6 @@ export class SubscriptionService {
     return scan(payload);
   }
 
-  /**
-   * Sends a JSON POST request.
-   */
   private postJson(
     url: string,
     payload: Record<string, unknown>,
@@ -544,9 +510,6 @@ export class SubscriptionService {
     return this.http.post<SubscriptionResponse>(url, payload);
   }
 
-  /**
-   * Sends a multipart/form-data POST request.
-   */
   private postMultipart(
     url: string,
     payload: Record<string, unknown>,
@@ -554,18 +517,6 @@ export class SubscriptionService {
     return this.http.post<SubscriptionResponse>(url, this.toFormData(payload));
   }
 
-  /**
-   * Recursively serialises a payload into FormData.
-   *
-   * Value rules
-   * ───────────
-   * File             → binary blob with original filename
-   * boolean          → '1' / '0'  (PHP/Laravel truthy convention)
-   * null | undefined → ''         (Laravel reads as null via ->nullable())
-   * Array            → key[N]     (indexed Laravel array convention)
-   * Plain object     → key[sub]   (bracket-notation recursion)
-   * Everything else  → String()
-   */
   private toFormData(
     payload: Record<string, unknown>,
     form = new FormData(),
@@ -577,11 +528,6 @@ export class SubscriptionService {
     return form;
   }
 
-  /**
-   * Internal recursive helper used by toFormData().
-   *
-   * Handles nested objects, arrays, primitive values and File instances.
-   */
   private appendValue(form: FormData, key: string, value: unknown): void {
     if (value instanceof File) {
       form.append(key, value, value.name);
@@ -600,22 +546,8 @@ export class SubscriptionService {
 
   // ── Error handling ──────────────────────────────────────────────────────────
 
-  /**
-   * Converts HTTP errors into typed domain errors and delegates server/network
-   * failures to ErrorReportingService for remote observability.
-   *
-   * Declared as an arrow function so `this` is always bound to the class
-   * instance, regardless of how RxJS invokes the callback inside catchError().
-   *
-   * Mapping rules
-   * ─────────────
-   * 422              → SubscriptionValidationError  (NOT reported — user mistake)
-   * Other HTTP error → SubscriptionError            (5xx/0 reported via ErrorReportingService)
-   * Non-HTTP error   → SubscriptionError(status: 0) (always reported)
-   */
   private readonly handleError = (err: unknown): Observable<never> => {
     if (err instanceof HttpErrorResponse) {
-      // ── 422 Validation — expected, do not report ───────────────────────────
       if (err.status === 422) {
         const body = err.error as ValidationErrorResponse;
         return throwError(
@@ -627,7 +559,6 @@ export class SubscriptionService {
         );
       }
 
-      // ── All other HTTP errors — report 5xx/0 to ErrorReportingService ──────
       this.errorReporting.captureHttpError(err, 'SubscriptionService');
 
       const message =
@@ -636,7 +567,6 @@ export class SubscriptionService {
       return throwError(() => new SubscriptionError(message, err.status));
     }
 
-    // ── Non-HTTP error — completely unexpected, always report ──────────────
     this.errorReporting.captureUnexpectedError(err, 'SubscriptionService');
     return throwError(() => new SubscriptionError('An unexpected error occurred.', 0));
   };
@@ -663,12 +593,10 @@ export class SubscriptionValidationError extends SubscriptionError {
     this.name = 'SubscriptionValidationError';
   }
 
-  /** Returns the first validation error message for a field. */
   firstError(field: string): string | null {
     return this.errors[field]?.[0] ?? null;
   }
 
-  /** Returns all fields that failed validation. */
   get invalidFields(): string[] {
     return Object.keys(this.errors);
   }

@@ -144,8 +144,14 @@ export function buildSpeakerSections(
       fields: [
         { label: t('formReview.fields.photo'), value: '', image: sp['photo'] as File | null },
         { label: t('formReview.fields.name'), value: String(sp['name'] ?? '') },
+        // federalCode is shown inline beside email so the card stays compact
+        {
+          label: t('formReview.fields.federalCode'),
+          value: String(sp['federalCode'] ?? ''),
+          inline: true,
+        },
         { label: t('formReview.fields.email'), value: String(sp['email'] ?? ''), inline: true },
-        { label: t('formReview.fields.phone'), value: String(sp['phone'] ?? ''), inline: true },
+        { label: t('formReview.fields.phone'), value: String(sp['phone'] ?? '') },
         { label: t('formReview.fields.site'), value: String(sp['site'] ?? '') },
         { label: t('formReview.fields.minicurriculo'), value: String(sp['minicurriculo'] ?? '') },
       ],

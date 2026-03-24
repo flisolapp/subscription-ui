@@ -10,6 +10,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PageStructure } from '../../components/page-structure/page-structure';
 import { SubscriptionType } from '../../models/subscription-type/subscription-type';
 import {
+  SpeakerTwoStepProgress,
   SubscriptionError,
   SubscriptionService,
   SubscriptionValidationError,
@@ -22,6 +23,11 @@ import {
   TranslateFn,
 } from './review-sections.builder';
 import { SNACK_DURATION } from '../../app.config';
+
+// ── File size limits (must mirror SpeakerCard and TalkCard constants) ─────────
+
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+const SLIDE_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
 // ── Public interfaces (consumed by builder) ───────────────────────────────────
 
@@ -75,10 +81,15 @@ export class FormReview implements OnInit {
   readonly formType = signal<SubscriptionType>('participant');
 
   /**
-   * 0–100 during an active upload (drives the determinate progress bar).
-   * null = no active upload → progress bar renders as indeterminate.
+   * 0–100 during an active file upload; null = indeterminate (registering step).
    */
   readonly uploadPercent = signal<number | null>(null);
+
+  /**
+   * Human-readable label shown in the submit button during a two-step upload.
+   * Null means we're not in two-step mode (participant / collaborator).
+   */
+  readonly uploadStepKey = signal<string | null>(null);
 
   readonly titleKey = computed(() => FORM_CONFIG[this.formType()].titleKey);
   readonly backRoute = computed(() => FORM_CONFIG[this.formType()].backRoute);
@@ -152,14 +163,87 @@ export class FormReview implements OnInit {
     this.router.navigate([this.backRoute()]);
   }
 
-  // ── 1. onConfirm - production path ────────────────────────────────────────
-
+  /**
+   * Main confirmation handler.
+   *
+   * Routes to the correct submission strategy based on subscription type:
+   * - speaker     → two-step (JSON registration then individual file uploads)
+   * - participant / collaborator → single multipart / JSON request with progress
+   */
   onConfirm(): void {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
 
+    if (this.formType() === 'speaker') {
+      this.confirmSpeakerTwoStep(payload);
+    } else {
+      this.confirmWithProgress(payload);
+    }
+  }
+
+  // ── Private submission strategies ─────────────────────────────────────────
+
+  /**
+   * Two-step speaker submission:
+   *   1. Re-validates file sizes before sending anything.
+   *   2. POSTs JSON (no files) → receives speaker/talk IDs.
+   *   3. Uploads each photo and slide individually.
+   *   4. Navigates to success page.
+   */
+  private confirmSpeakerTwoStep(payload: Record<string, unknown>): void {
+    // ── Re-validate file sizes at review time ─────────────────────────────
+    const validationError = this.validateSpeakerFiles(payload);
+    if (validationError) {
+      this.snackBar.open(validationError, this.translate.instant('common.ok'), {
+        duration: SNACK_DURATION,
+      });
+      return;
+    }
+
     this.loading.set(true);
     this.uploadPercent.set(null);
+    this.uploadStepKey.set('formReview.stepRegistering');
+
+    this.subscriptionService
+      .submitSpeakerTwoStep(payload, (progress: SpeakerTwoStepProgress) => {
+        if (progress.step === 'registering') {
+          this.uploadPercent.set(null);
+          this.uploadStepKey.set('formReview.stepRegistering');
+        } else {
+          this.uploadPercent.set(progress.percent);
+          this.uploadStepKey.set(
+            progress.fileIndex != null && progress.fileTotal != null
+              ? null // use percent display instead
+              : 'formReview.stepUploading',
+          );
+        }
+
+        if (progress.done) {
+          this.clearFormStorage();
+          this.router.navigate(['/subscribe/success'], {
+            state: { type: this.formType() },
+            replaceUrl: true,
+          });
+        }
+      })
+      .then(() => {
+        // Navigation already triggered inside the progress callback on done=true
+      })
+      .catch((err: unknown) => {
+        this.loading.set(false);
+        this.uploadPercent.set(null);
+        this.uploadStepKey.set(null);
+        this.handleSubmitError(err);
+      });
+  }
+
+  /**
+   * Standard upload-with-progress path for participant and collaborator.
+   */
+  private confirmWithProgress(payload: Record<string, unknown>): void {
+    this.loading.set(true);
+    this.uploadPercent.set(null);
+    this.uploadStepKey.set(null);
 
     this.subscriptionService.submitWithProgress(this.formType(), payload).subscribe({
       next: ({ percent, done }) => {
@@ -185,7 +269,42 @@ export class FormReview implements OnInit {
     });
   }
 
-  // ── 2. onConfirmSimple - fallback / lower-overhead path ───────────────────
+  /**
+   * Validates that no attached speaker file exceeds its size limit.
+   * Returns a translated error message string, or null if everything is valid.
+   *
+   * This is a second guard — the primary guard lives in SpeakerCard / TalkCard.
+   * Running it again here protects against any edge-case where the payload
+   * reached the review page with an oversized file already attached.
+   */
+  private validateSpeakerFiles(payload: Record<string, unknown>): string | null {
+    const speakers = (payload['speakers'] as Array<Record<string, unknown>>) ?? [];
+    const talks = (payload['talks'] as Array<Record<string, unknown>>) ?? [];
+
+    for (let i = 0; i < speakers.length; i++) {
+      const photo = speakers[i]['photo'];
+      if (photo instanceof File && photo.size > PHOTO_MAX_BYTES) {
+        return this.translate.instant('fileSizeError.photo', {
+          max: '5 MB',
+          name: photo.name,
+        });
+      }
+    }
+
+    for (let i = 0; i < talks.length; i++) {
+      const slide = talks[i]['slideFile'];
+      if (slide instanceof File && slide.size > SLIDE_MAX_BYTES) {
+        return this.translate.instant('fileSizeError.slide', {
+          max: '10 MB',
+          name: slide.name,
+        });
+      }
+    }
+
+    return null;
+  }
+
+  // ── Fallback paths (dev / debug) ──────────────────────────────────────────
 
   async onConfirmSimple(): Promise<void> {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
@@ -214,8 +333,6 @@ export class FormReview implements OnInit {
     }
   }
 
-  // ── 3. onConfirmDry - dev/debug path ──────────────────────────────────────
-
   async onConfirmDry(): Promise<void> {
     const payload = history.state?.['payload'] as Record<string, unknown> | undefined;
     if (!payload) return;
@@ -225,7 +342,6 @@ export class FormReview implements OnInit {
 
     try {
       await this.subscriptionService.submitDry(this.formType(), payload);
-      // Dry run: no clearFormStorage(), no navigate - stay on page for re-runs
       this.router.navigate(['/subscribe/success'], {
         state: { type: this.formType() },
         replaceUrl: true,

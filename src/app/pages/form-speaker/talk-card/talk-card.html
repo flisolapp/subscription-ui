@@ -105,6 +105,7 @@
     </label>
     <div
       class="slide-upload-area"
+      [class.slide-upload-area--error]="!!slideSizeErrorKey()"
       (click)="slideFileInput.click()"
       role="button"
       tabindex="0"
@@ -145,6 +146,13 @@
         </div>
       }
     </div>
+
+    <!-- File size error (shown when the selected file exceeds 10 MB) -->
+    @if (slideSizeErrorKey()) {
+      <mat-error class="slide-size-error">
+        {{ slideSizeErrorKey()! | translate: { max: '10 MB', name: slideRejectedName() } }}
+      </mat-error>
+    }
   </div>
 
   <!-- Endereço do Slide (URL) -->

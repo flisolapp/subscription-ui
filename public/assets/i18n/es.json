@@ -158,7 +158,7 @@
       "photoDownload": "Descargar foto",
       "photoRemove": "Eliminar foto",
       "photoError": "Por favor sube una foto.",
-      "photoFormat": "PNG o JPG",
+      "photoFormat": "PNG, JPG o WEBP",
       "name": "Nombre",
       "federalCode": "Código Federal",
       "federalCodeHint": "Registro de Contribuyente Individual de Brasil",
@@ -217,12 +217,18 @@
       "outro": "Otro"
     }
   },
+  "fileSizeError": {
+    "photo": "La foto \"{{ name }}\" supera el límite de {{ max }}. Seleccione una imagen más pequeña.",
+    "slide": "El archivo \"{{ name }}\" supera el límite de {{ max }}. Seleccione un archivo más pequeño."
+  },
   "formReview": {
     "confirmationLabel": "Confirmación",
     "reviewHint": "Revisa tus datos antes de confirmar el envío.",
     "speakerPhotoAlt": "Foto del orador",
     "backAndEdit": "Volver y editar",
     "confirmAndSend": "Confirmar y enviar",
+    "stepRegistering": "Registrando inscripción…",
+    "stepUploading": "Enviando archivos…",
     "fields": {
       "name": "Nombre",
       "federalCode": "Código Federal",

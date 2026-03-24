@@ -7,6 +7,7 @@ import {
   output,
   signal,
   ViewChild,
+  WritableSignal
 } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatError, MatFormField, MatHint, MatInput, MatLabel } from '@angular/material/input';
@@ -16,6 +17,9 @@ import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { formatCpf, formatPhone, getControlError } from '../../../forms/form-field/form-field';
+
+/** Maximum allowed photo size in bytes (5 MB). */
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-speaker-card',
@@ -47,6 +51,13 @@ export class SpeakerCard implements OnDestroy {
   @ViewChild('photoFileInput') private photoFileInput!: ElementRef<HTMLInputElement>;
 
   readonly photoPreviewUrl = signal<string | null>(null);
+
+  /** Translation key for the current file-size error, or null when valid. */
+  readonly photoSizeErrorKey: WritableSignal<string | null> = signal(null);
+
+  /** Name of the rejected file, used as the {{ name }} param in the error message. */
+  readonly photoRejectedName: WritableSignal<string> = signal('');
+
   private previousUrl: string | null = null;
 
   constructor(private readonly translate: TranslateService) {
@@ -87,12 +98,31 @@ export class SpeakerCard implements OnDestroy {
 
   onPhotoSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+
+    if (!file) {
+      this.photoSizeErrorKey.set(null);
+      this.photoRejectedName.set('');
+      this.photoChange.emit(null);
+      return;
+    }
+
+    if (file.size > PHOTO_MAX_BYTES) {
+      this.photoFileInput.nativeElement.value = '';
+      this.photoSizeErrorKey.set('fileSizeError.photo');
+      this.photoRejectedName.set(file.name);
+      return;
+    }
+
+    this.photoSizeErrorKey.set(null);
+    this.photoRejectedName.set('');
     this.photoChange.emit(file);
   }
 
   onPhotoRemove(event: MouseEvent): void {
     event.stopPropagation();
     this.photoFileInput.nativeElement.value = '';
+    this.photoSizeErrorKey.set(null);
+    this.photoRejectedName.set('');
     this.photoChange.emit(null);
   }
 

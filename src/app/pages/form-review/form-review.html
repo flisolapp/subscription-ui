@@ -1,4 +1,4 @@
-<!-- Progress bar: determinate during upload, indeterminate while server responds -->
+<!-- Progress bar: determinate during file uploads, indeterminate while registering -->
 @if (loading()) {
   @if (uploadPercent() !== null) {
     <mat-progress-bar
@@ -140,7 +140,6 @@
       <!-- ── Action buttons ──────────────────────────────────────────────────── -->
       <div class="flex flex-col gap-4 pt-8">
 
-        <!-- Primary actions -->
         <div class="flex justify-end gap-3">
           <button mat-button type="button" [disabled]="loading()" (click)="onBack()">
             <mat-icon>arrow_back</mat-icon>
@@ -154,12 +153,20 @@
             [disabled]="loading()"
             (click)="onConfirm()"
           >
-            @if (loading() && uploadPercent() !== null) {
+            @if (loading() && uploadStepKey()) {
+              <!-- Two-step speaker: show step label -->
+              <span class="flex items-center gap-1">
+                <mat-icon class="animate-spin">autorenew</mat-icon>
+                {{ uploadStepKey()! | translate }}
+              </span>
+            } @else if (loading() && uploadPercent() !== null) {
+              <!-- File upload in progress: show percent -->
               <span class="flex items-center gap-1">
                 <mat-icon>upload</mat-icon>
                 {{ uploadPercent() }}%…
               </span>
             } @else if (loading()) {
+              <!-- Indeterminate / generic sending -->
               <span class="flex items-center gap-1">
                 <mat-icon class="animate-spin">autorenew</mat-icon>
                 {{ 'common.sending' | translate }}

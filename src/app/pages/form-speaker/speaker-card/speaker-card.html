@@ -54,7 +54,7 @@
       <input
         #photoFileInput
         type="file"
-        accept="image/png,image/jpeg"
+        accept="image/png,image/jpeg,image/webp"
         class="hidden-input"
         (change)="onPhotoSelect($event)"
       />
@@ -82,7 +82,12 @@
         </div>
       }
 
-      @if (hasPhotoError) {
+      <!-- File size error (shown when the selected file exceeds 5 MB) -->
+      @if (photoSizeErrorKey()) {
+        <mat-error class="photo-error">
+          {{ photoSizeErrorKey()! | translate: { max: '5 MB', name: photoRejectedName() } }}
+        </mat-error>
+      } @else if (hasPhotoError) {
         <mat-error class="photo-error">
           {{ 'formSpeaker.speakerCard.photoError' | translate }}
         </mat-error>
