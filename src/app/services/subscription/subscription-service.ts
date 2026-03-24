@@ -9,6 +9,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, filter, lastValueFrom, map, Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { STORAGE_KEYS } from '../../constants/storage-keys';
+import { ErrorReportingService } from '../error-reporting/error-reporting-service';
 
 // ── Response shapes ───────────────────────────────────────────────────────────
 
@@ -63,6 +64,9 @@ export class SubscriptionService {
 
   /** Base API URL defined in the Angular environment configuration. */
   private readonly baseUrl = environment.apiUrl;
+
+  /** Centralised error reporting — owns all Sentry interactions. */
+  private readonly errorReporting = inject(ErrorReportingService);
 
   // ── 1. submit() ─────────────────────────────────────────────────────────────
   /**
@@ -619,16 +623,21 @@ export class SubscriptionService {
   // ── Error handling ──────────────────────────────────────────────────────────
 
   /**
-   * Converts HTTP errors into typed domain errors.
+   * Converts HTTP errors into typed domain errors and delegates server/network
+   * failures to ErrorReportingService for remote observability.
+   *
+   * Declared as an arrow function so `this` is always bound to the class
+   * instance, regardless of how RxJS invokes the callback inside catchError().
    *
    * Mapping rules
    * ─────────────
-   * 422 → SubscriptionValidationError
-   * Other HTTP errors → SubscriptionError
-   * Network failure → SubscriptionError(status: 0)
+   * 422              → SubscriptionValidationError  (NOT reported — user mistake)
+   * Other HTTP error → SubscriptionError            (5xx/0 reported via ErrorReportingService)
+   * Non-HTTP error   → SubscriptionError(status: 0) (always reported)
    */
-  private handleError(err: unknown): Observable<never> {
+  private readonly handleError = (err: unknown): Observable<never> => {
     if (err instanceof HttpErrorResponse) {
+      // ── 422 Validation — expected, do not report ───────────────────────────
       if (err.status === 422) {
         const body = err.error as ValidationErrorResponse;
         return throwError(
@@ -640,13 +649,19 @@ export class SubscriptionService {
         );
       }
 
+      // ── All other HTTP errors — report 5xx/0 to ErrorReportingService ──────
+      this.errorReporting.captureHttpError(err, 'SubscriptionService');
+
       const message =
-        (err.error as { message?: string })?.message ?? `HTTP ${err.status}: ${err.statusText}`;
+        this.errorReporting.extractServerMessage(err) ?? `HTTP ${err.status}: ${err.statusText}`;
+
       return throwError(() => new SubscriptionError(message, err.status));
     }
 
+    // ── Non-HTTP error — completely unexpected, always report ──────────────
+    this.errorReporting.captureUnexpectedError(err, 'SubscriptionService');
     return throwError(() => new SubscriptionError('An unexpected error occurred.', 0));
-  }
+  };
 }
 
 // ── Custom error classes ──────────────────────────────────────────────────────

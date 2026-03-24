@@ -32,7 +32,10 @@
             "styles": [
               "src/tailwind.css",
               "src/styles.scss"
-            ]
+            ],
+            "define": {
+              "__SENTRY_DSN__": "''"
+            }
           },
           "configurations": {
             "production": {
@@ -40,7 +43,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumError": "1.5MB"
                 },
                 {
                   "type": "anyComponentStyle",

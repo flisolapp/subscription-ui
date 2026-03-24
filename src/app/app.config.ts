@@ -3,8 +3,9 @@ import {
   inject,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
+  ErrorHandler,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 
 import { provideTranslateService } from '@ngx-translate/core';
@@ -12,6 +13,8 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
 import { MatIconRegistry } from '@angular/material/icon';
+
+import * as Sentry from '@sentry/angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,6 +35,18 @@ export const appConfig: ApplicationConfig = {
       // iconRegistry.setDefaultFontSetClass('material-symbols-outlined');
       // iconRegistry.registerFontClassAlias('material-icons', 'material-icons');
       iconRegistry.registerFontClassAlias('outlined', 'material-symbols-outlined');
+    }),
+
+    {
+      provide: ErrorHandler,
+      useValue: Sentry.createErrorHandler(),
+    },
+    {
+      provide: Sentry.TraceService,
+      deps: [Router],
+    },
+    provideAppInitializer(() => {
+      inject(Sentry.TraceService);
     }),
   ],
 };

@@ -46,6 +46,14 @@
 
   <div class="spacer"></div>
 
+  <!-- Sentry Test Error -->
+  <button mat-icon-button (click)="throwTestError()">
+    <mat-icon fontSet="outlined">
+      error
+    </mat-icon>
+  </button>
+  <!-- -->
+
   <button mat-icon-button (click)="toggleColorScheme()"
           matTooltip="{{ (darkMode() ? 'header.turnOnLightMode' : 'header.turnOnDarkMode') | translate }}"
           [matTooltipPosition]="'below'">

@@ -66,4 +66,8 @@ export class Toolbar implements OnInit {
       window.flutter_inappwebview.callHandler('setDarkMode', this.darkMode());
     }
   }
+
+  public throwTestError(): void {
+    throw new Error('Sentry Test Error');
+  }
 }
