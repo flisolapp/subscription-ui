@@ -86,12 +86,12 @@ export class SpeakerCard implements OnDestroy {
 
   onFederalCodeInput(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    this.group().get('federalCode')!.setValue(formatCpf(raw), { emitEvent: true });
+    this.group().get('federalCode')!.setValue(formatCpf(raw), { emitEvent: false });
   }
 
   onPhoneInput(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    this.group().get('phone')!.setValue(formatPhone(raw), { emitEvent: true });
+    this.group().get('phone')!.setValue(formatPhone(raw), { emitEvent: false });
   }
 
   // ── File input ─────────────────────────────────────────────────────────────

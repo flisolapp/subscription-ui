@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -14,7 +14,7 @@ import { CustomValidators } from '../../forms/custom-validators/custom-validator
 import { FILE_PREFIXES, STORAGE_KEYS } from '../../constants/storage-keys';
 import { SpeakerCard } from './speaker-card/speaker-card';
 import { TalkCard } from './talk-card/talk-card';
-import { NavItem, SpeakerFormNav } from './speaker-form-nav/speaker-form-nav';
+import { SpeakerFormNav } from './speaker-form-nav/speaker-form-nav';
 import { SNACK_DURATION } from '../../app.config';
 
 // ── Serialisation helpers ─────────────────────────────────────────────────────
@@ -180,25 +180,25 @@ export class FormSpeaker implements OnInit, OnDestroy {
     return this.speakersArray.length + this.talksArray.length > 2;
   }
 
-  get speakerNavItems(): NavItem[] {
-    return this.speakersArray.controls.map((ctrl, i) => ({
+  readonly speakerNavItems = computed(() =>
+    this.speakersArray.controls.map((ctrl, i) => ({
       label:
         (ctrl.get('name')?.value as string) ||
         this.translate.instant('formSpeaker.speakerCard.title', { n: i + 1 }),
       hasError: this.submittedSig() && (ctrl.invalid || !this.speakerPhotos()[i]),
       anchorId: `speaker-${i}`,
-    }));
-  }
+    })),
+  );
 
-  get talkNavItems(): NavItem[] {
-    return this.talksArray.controls.map((ctrl, i) => ({
+  readonly talkNavItems = computed(() =>
+    this.talksArray.controls.map((ctrl, i) => ({
       label:
         (ctrl.get('titulo')?.value as string) ||
         this.translate.instant('formSpeaker.talkCard.title', { n: i + 1 }),
       hasError: this.submittedSig() && ctrl.invalid,
       anchorId: `talk-${i}`,
-    }));
-  }
+    })),
+  );
 
   // ── Submit / Back ──────────────────────────────────────────────────────────
 
@@ -252,7 +252,9 @@ export class FormSpeaker implements OnInit, OnDestroy {
         while (this.speakersArray.length > savedSpeakers.length)
           this.speakersArray.removeAt(this.speakersArray.length - 1);
 
-        savedSpeakers.forEach((s, i) => this.speakersArray.at(i).patchValue(s));
+        savedSpeakers.forEach((s, i) =>
+          this.speakersArray.at(i).patchValue(s, { emitEvent: false }),
+        );
 
         const photos = await Promise.all(
           savedSpeakers.map((s, i) =>
@@ -270,7 +272,7 @@ export class FormSpeaker implements OnInit, OnDestroy {
         while (this.talksArray.length > savedTalks.length)
           this.talksArray.removeAt(this.talksArray.length - 1);
 
-        savedTalks.forEach((t, i) => this.talksArray.at(i).patchValue(t));
+        savedTalks.forEach((t, i) => this.talksArray.at(i).patchValue(t, { emitEvent: false }));
 
         const slides = await Promise.all(
           savedTalks.map((t, i) =>

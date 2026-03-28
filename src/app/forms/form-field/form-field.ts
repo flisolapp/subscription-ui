@@ -120,7 +120,7 @@ export function buildDisplayLabel(
  *   onPhoneInput(event: Event): void {
  *     const raw = (event.target as HTMLInputElement).value;
  *     const formatted = formatPhone(raw);
- *     this.form.get('phone')!.setValue(formatted, { emitEvent: true });
+ *     this.form.get('phone')!.setValue(formatted, { emitEvent: false });
  *   }
  */
 export function formatPhone(raw: string): string {
@@ -139,7 +139,7 @@ export function formatPhone(raw: string): string {
  *   onCpfInput(event: Event): void {
  *     const raw = (event.target as HTMLInputElement).value;
  *     const formatted = formatCpf(raw);
- *     this.form.get('federalCode')!.setValue(formatted, { emitEvent: true });
+ *     this.form.get('federalCode')!.setValue(formatted, { emitEvent: false });
  *   }
  */
 export function formatCpf(raw: string): string {

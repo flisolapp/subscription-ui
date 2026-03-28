@@ -1,4 +1,5 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
@@ -94,6 +95,11 @@ export class FormReview implements OnInit {
   readonly titleKey = computed(() => FORM_CONFIG[this.formType()].titleKey);
   readonly backRoute = computed(() => FORM_CONFIG[this.formType()].backRoute);
 
+  /** Payload kept so sections can be rebuilt on language change. */
+  private payload: Record<string, unknown> | null = null;
+
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(
     private readonly router: Router,
     private readonly route: ActivatedRoute,
@@ -120,7 +126,13 @@ export class FormReview implements OnInit {
       return;
     }
 
+    this.payload = payload;
     this.sections.set(this.buildSections(type, payload));
+
+    // Rebuild sections whenever the active language changes.
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.sections.set(this.buildSections(this.formType(), this.payload!));
+    });
   }
 
   // ── Template helpers ──────────────────────────────────────────────────────

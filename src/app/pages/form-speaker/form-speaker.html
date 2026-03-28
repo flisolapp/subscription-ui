@@ -5,8 +5,8 @@
       <!-- Nav (shown when speakers + talks > 2) -->
       @if (showNav) {
         <app-speaker-form-nav
-          [speakerItems]="speakerNavItems"
-          [talkItems]="talkNavItems"
+          [speakerItems]="speakerNavItems()"
+          [talkItems]="talkNavItems()"
         />
       }
 

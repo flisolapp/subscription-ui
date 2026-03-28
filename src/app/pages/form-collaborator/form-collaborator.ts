@@ -118,12 +118,12 @@ export class FormCollaborator implements OnInit, OnDestroy {
 
   public onFederalCodeInput(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    this.form.get('federalCode')!.setValue(formatCpf(raw), { emitEvent: true });
+    this.form.get('federalCode')!.setValue(formatCpf(raw), { emitEvent: false });
   }
 
   public onPhoneInput(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    this.form.get('phone')!.setValue(formatPhone(raw), { emitEvent: true });
+    this.form.get('phone')!.setValue(formatPhone(raw), { emitEvent: false });
   }
 
   // ── Checkbox helpers ───────────────────────────────────────────────────────
